@@ -22,9 +22,9 @@ class HomeScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
           children: [
-            _Header(),
+            const _Header(),
             const SizedBox(height: 24),
-            Row(
+            const Row(
               children: [
                 Expanded(
                   child: StatCard(
@@ -35,7 +35,7 @@ class HomeScreen extends StatelessWidget {
                     trend: '+12%',
                   ),
                 ),
-                const SizedBox(width: 14),
+                SizedBox(width: 14),
                 Expanded(
                   child: StatCard(
                     icon: Icons.timer_rounded,
@@ -47,7 +47,7 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 14),
-            Row(
+            const Row(
               children: [
                 Expanded(
                   child: StatCard(
@@ -57,13 +57,13 @@ class HomeScreen extends StatelessWidget {
                     accentColor: AppColors.warning,
                   ),
                 ),
-                const SizedBox(width: 14),
+                SizedBox(width: 14),
                 Expanded(
                   child: StatCard(
                     icon: Icons.flag_rounded,
                     value: '3/5',
                     label: 'Weekly goal',
-                    accentColor: const Color(0xFF2E7CF6),
+                    accentColor: Color(0xFF2E7CF6),
                   ),
                 ),
               ],

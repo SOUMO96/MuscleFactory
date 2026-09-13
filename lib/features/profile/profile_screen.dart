@@ -38,8 +38,8 @@ class ProfileScreen extends StatelessWidget {
                       Container(
                         width: 96,
                         height: 96,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(colors: AppColors.primaryGradient),
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(colors: AppColors.primaryGradient),
                           shape: BoxShape.circle,
                         ),
                         alignment: Alignment.center,
@@ -79,8 +79,8 @@ class ProfileScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: AppColors.divider),
               ),
-              child: Row(
-                children: const [
+              child: const Row(
+                children: [
                   Expanded(child: _ProfileStat(value: '42', label: 'Workouts')),
                   _VerticalDivider(),
                   Expanded(child: _ProfileStat(value: '6', label: 'Day Streak')),
@@ -92,7 +92,7 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 28),
             Text('ACCOUNT', style: AppTextStyles.caption),
             const SizedBox(height: 10),
-            _MenuCard(items: [
+            const _MenuCard(items: [
               _MenuItemData(icon: Icons.person_outline_rounded, label: 'Personal Information'),
               _MenuItemData(icon: Icons.flag_outlined, label: 'Goals & Targets'),
               _MenuItemData(icon: Icons.emoji_events_outlined, label: 'Achievements'),
@@ -100,7 +100,7 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 24),
             Text('PREFERENCES', style: AppTextStyles.caption),
             const SizedBox(height: 10),
-            _MenuCard(items: [
+            const _MenuCard(items: [
               _MenuItemData(icon: Icons.notifications_none_rounded, label: 'Notifications'),
               _MenuItemData(icon: Icons.link_rounded, label: 'Connected Apps'),
               _MenuItemData(icon: Icons.dark_mode_outlined, label: 'Appearance'),
@@ -108,7 +108,7 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 24),
             Text('SUPPORT', style: AppTextStyles.caption),
             const SizedBox(height: 10),
-            _MenuCard(items: [
+            const _MenuCard(items: [
               _MenuItemData(icon: Icons.help_outline_rounded, label: 'Help & Support'),
               _MenuItemData(icon: Icons.privacy_tip_outlined, label: 'Privacy Policy'),
             ]),

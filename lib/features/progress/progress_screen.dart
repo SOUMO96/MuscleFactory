@@ -1,4 +1,4 @@
-﻿import 'package:fl_chart/fl_chart.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
@@ -130,10 +130,10 @@ class _ProgressScreenState extends State<ProgressScreen> {
               ),
             ),
             const SizedBox(height: 28),
-            SectionHeader(title: 'Overview'),
+            const SectionHeader(title: 'Overview'),
             const SizedBox(height: 14),
-            Row(
-              children: const [
+            const Row(
+              children: [
                 Expanded(
                   child: StatCard(
                     icon: Icons.monitor_weight_outlined,
@@ -156,8 +156,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
               ],
             ),
             const SizedBox(height: 14),
-            Row(
-              children: const [
+            const Row(
+              children: [
                 Expanded(
                   child: StatCard(
                     icon: Icons.fitness_center_rounded,
@@ -224,7 +224,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               ),
             ),
             const SizedBox(height: 28),
-            SectionHeader(title: 'Body Measurements'),
+            const SectionHeader(title: 'Body Measurements'),
             const SizedBox(height: 14),
             Container(
               decoration: BoxDecoration(
@@ -232,8 +232,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: AppColors.divider),
               ),
-              child: Column(
-                children: const [
+              child: const Column(
+                children: [
                   _MeasurementRow(label: 'Chest', value: '102 cm', delta: '+1.0 cm'),
                   Divider(height: 1, indent: 16, endIndent: 16),
                   _MeasurementRow(label: 'Waist', value: '84 cm', delta: '-2.0 cm'),

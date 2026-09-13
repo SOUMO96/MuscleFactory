@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 
@@ -62,12 +62,12 @@ class _SplashScreenState extends State<SplashScreen> {
               style: AppTextStyles.bodySmall.copyWith(letterSpacing: 3, color: AppColors.textMuted),
             ),
             const SizedBox(height: 56),
-            SizedBox(
+            const SizedBox(
               width: 32,
               height: 32,
               child: CircularProgressIndicator(
                 strokeWidth: 3,
-                valueColor: const AlwaysStoppedAnimation(AppColors.primary),
+                valueColor: AlwaysStoppedAnimation(AppColors.primary),
                 backgroundColor: AppColors.divider,
               ),
             ),

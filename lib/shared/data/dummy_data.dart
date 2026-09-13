@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../models/workout.dart';
@@ -146,17 +146,17 @@ class DummyData {
   /// Mon..Sun relative calories burned, used by the Progress bar chart.
   static const List<double> weeklyCalories = [320, 450, 280, 510, 390, 600, 210];
 
-  static const List<_Achievement> achievements = [
-    _Achievement(label: '7 Day\nStreak', icon: Icons.local_fire_department_rounded, unlocked: true),
-    _Achievement(label: 'First\nWorkout', icon: Icons.emoji_events_rounded, unlocked: true),
-    _Achievement(label: '10 Workouts', icon: Icons.military_tech_rounded, unlocked: true),
-    _Achievement(label: '5K Run', icon: Icons.directions_run_rounded, unlocked: false),
-    _Achievement(label: '30 Day\nStreak', icon: Icons.local_fire_department_rounded, unlocked: false),
+  static const List<Achievement> achievements = [
+    Achievement(label: '7 Day\nStreak', icon: Icons.local_fire_department_rounded, unlocked: true),
+    Achievement(label: 'First\nWorkout', icon: Icons.emoji_events_rounded, unlocked: true),
+    Achievement(label: '10 Workouts', icon: Icons.military_tech_rounded, unlocked: true),
+    Achievement(label: '5K Run', icon: Icons.directions_run_rounded, unlocked: false),
+    Achievement(label: '30 Day\nStreak', icon: Icons.local_fire_department_rounded, unlocked: false),
   ];
 }
 
-class _Achievement {
-  const _Achievement({required this.label, required this.icon, required this.unlocked});
+class Achievement {
+  const Achievement({required this.label, required this.icon, required this.unlocked});
   final String label;
   final IconData icon;
   final bool unlocked;

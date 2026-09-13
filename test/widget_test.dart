@@ -9,5 +9,9 @@ void main() {
 
     expect(find.text('IRONPULSE'), findsOneWidget);
     expect(find.byIcon(Icons.bolt_rounded), findsOneWidget);
+
+    // Flush the splash screen's navigation timer so it doesn't leak past
+    // the end of the test.
+    await tester.pump(const Duration(milliseconds: 1800));
   });
 }
