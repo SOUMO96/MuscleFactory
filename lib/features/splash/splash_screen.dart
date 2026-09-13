@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../core/navigation/main_shell.dart';
+import '../../core/services/auth_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../onboarding/onboarding_screen.dart';
@@ -20,8 +22,11 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     Timer(const Duration(milliseconds: 1800), () {
       if (!mounted) return;
+      final loggedIn = AuthService.instance.currentUser != null;
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+        MaterialPageRoute(
+          builder: (_) => loggedIn ? const MainShell() : const OnboardingScreen(),
+        ),
       );
     });
   }

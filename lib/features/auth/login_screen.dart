@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/navigation/main_shell.dart';
+import '../../core/services/auth_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/primary_button.dart';
@@ -14,13 +15,61 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _obscure = true;
+  bool _loading = false;
 
-  void _continue() {
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _goToApp() {
+    if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const MainShell()),
       (route) => false,
     );
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: AppColors.error),
+    );
+  }
+
+  Future<void> _login() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    if (email.isEmpty || password.isEmpty) {
+      _showError('Enter your email and password.');
+      return;
+    }
+
+    setState(() => _loading = true);
+    try {
+      await AuthService.instance.signInWithEmail(email: email, password: password);
+      _goToApp();
+    } catch (e) {
+      _showError(AuthService.instance.messageForError(e));
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _loginWithGoogle() async {
+    setState(() => _loading = true);
+    try {
+      await AuthService.instance.signInWithGoogle();
+      _goToApp();
+    } catch (e) {
+      _showError(AuthService.instance.messageForError(e));
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   @override
@@ -51,9 +100,10 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 32),
               Text('EMAIL', style: AppTextStyles.caption),
               const SizedBox(height: 8),
-              const TextField(
+              TextField(
+                controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'you@example.com',
                   prefixIcon: Icon(Icons.mail_outline_rounded, color: AppColors.textMuted),
                 ),
@@ -62,6 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Text('PASSWORD', style: AppTextStyles.caption),
               const SizedBox(height: 8),
               TextField(
+                controller: _passwordController,
                 obscureText: _obscure,
                 decoration: InputDecoration(
                   hintText: '••••••••',
@@ -83,7 +134,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              PrimaryButton(label: 'Log In', onPressed: _continue),
+              _loading
+                  ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                  : PrimaryButton(label: 'Log In', onPressed: _login),
               const SizedBox(height: 28),
               Row(
                 children: [
@@ -98,9 +151,21 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 24),
               Row(
                 children: [
-                  Expanded(child: _SocialButton(icon: Icons.g_mobiledata_rounded, label: 'Google', onTap: _continue)),
+                  Expanded(
+                    child: _SocialButton(
+                      icon: Icons.g_mobiledata_rounded,
+                      label: 'Google',
+                      onTap: _loading ? null : _loginWithGoogle,
+                    ),
+                  ),
                   const SizedBox(width: 14),
-                  Expanded(child: _SocialButton(icon: Icons.apple_rounded, label: 'Apple', onTap: _continue)),
+                  Expanded(
+                    child: _SocialButton(
+                      icon: Icons.apple_rounded,
+                      label: 'Apple',
+                      onTap: () => _showError('Sign in with Apple is not available yet.'),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 32),
@@ -131,7 +196,7 @@ class _SocialButton extends StatelessWidget {
   const _SocialButton({required this.icon, required this.label, required this.onTap});
   final IconData icon;
   final String label;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {

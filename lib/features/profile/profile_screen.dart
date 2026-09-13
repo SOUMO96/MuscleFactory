@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/services/auth_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../auth/login_screen.dart';
@@ -9,6 +10,17 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = AuthService.instance.currentUser;
+    final displayName = (user?.displayName?.trim().isNotEmpty ?? false) ? user!.displayName! : 'Athlete';
+    final email = user?.email ?? '';
+    final initials = displayName
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((part) => part.isNotEmpty)
+        .take(2)
+        .map((part) => part[0].toUpperCase())
+        .join();
+
     return Scaffold(
       body: SafeArea(
         bottom: false,
@@ -44,7 +56,7 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         alignment: Alignment.center,
                         child: Text(
-                          'AJ',
+                          initials.isEmpty ? '?' : initials,
                           style: AppTextStyles.display.copyWith(color: AppColors.background, fontSize: 30),
                         ),
                       ),
@@ -65,9 +77,9 @@ class ProfileScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 14),
-                  Text('Alex Johnson', style: AppTextStyles.h2),
+                  Text(displayName, style: AppTextStyles.h2),
                   const SizedBox(height: 2),
-                  Text('alex.johnson@email.com', style: AppTextStyles.bodySmall),
+                  Text(email, style: AppTextStyles.bodySmall),
                 ],
               ),
             ),
@@ -118,10 +130,14 @@ class ProfileScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(18),
               child: InkWell(
                 borderRadius: BorderRadius.circular(18),
-                onTap: () => Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
-                  (route) => false,
-                ),
+                onTap: () async {
+                  await AuthService.instance.signOut();
+                  if (!context.mounted) return;
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    (route) => false,
+                  );
+                },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   child: Row(

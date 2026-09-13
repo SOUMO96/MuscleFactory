@@ -1,0 +1,27 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "fitnessfactory-946fc",
+          "appId": "1:257733874109:android:be8524a95858c1ee0dc2d4",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "fitnessfactory-946fc",
+          "configurations": {
+            "android": "1:257733874109:android:be8524a95858c1ee0dc2d4",
+            "ios": "1:257733874109:ios:91a3e164972f99ca0dc2d4",
+            "web": "1:257733874109:web:8c9d89207c21b23d0dc2d4"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}
