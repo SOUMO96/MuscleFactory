@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/navigation/main_shell.dart';
@@ -9,11 +8,12 @@ import '../onboarding/onboarding_screen.dart';
 
 /// App boot screen: brand mark, tagline, then routes based on auth state.
 ///
-/// Waits for Firebase's first auth-state event rather than just checking
-/// [AuthService.currentUser] after a fixed delay, since on web that first
-/// event is also when a pending signInWithRedirect result gets resolved
-/// (Google sign-in uses a redirect, not a popup, because popups get
-/// blocked inside embedded browser panels/webviews).
+/// First resolves any pending signInWithRedirect result (Google sign-in
+/// uses a full-page redirect rather than a popup, since popups get
+/// blocked inside embedded browser panels/webviews) before trusting
+/// [AuthService.currentUser] — the redirect reloads the whole page, and
+/// Firebase needs a moment after boot to finish processing the returning
+/// auth result.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -30,20 +30,15 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _bootstrap() async {
     final minSplashTime = Future<void>.delayed(const Duration(milliseconds: 1800));
-    final authReady = AuthService.instance.authStateChanges.first;
+    final redirectResolved = AuthService.instance.resolvePendingRedirect();
 
-    User? loggedInUser;
-    await Future.wait<void>([
-      minSplashTime,
-      authReady.then((user) {
-        loggedInUser = user;
-      }),
-    ]);
+    await Future.wait([minSplashTime, redirectResolved]);
 
     if (!mounted) return;
+    final loggedIn = AuthService.instance.currentUser != null;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => loggedInUser != null ? const MainShell() : const OnboardingScreen(),
+        builder: (_) => loggedIn ? const MainShell() : const OnboardingScreen(),
       ),
     );
   }

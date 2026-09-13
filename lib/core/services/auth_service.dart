@@ -14,6 +14,21 @@ class AuthService {
   Stream<User?> get authStateChanges => _auth.authStateChanges();
   User? get currentUser => _auth.currentUser;
 
+  /// Resolves a pending `signInWithRedirect` result (web only; a no-op
+  /// with a null result on other platforms). Must be awaited before
+  /// trusting [currentUser] on app start, since the redirect flow reloads
+  /// the whole page and Firebase needs a moment to finish processing the
+  /// returning auth result.
+  Future<UserCredential?> resolvePendingRedirect() async {
+    if (!kIsWeb) return null;
+    try {
+      final result = await _auth.getRedirectResult();
+      return result.user == null ? null : result;
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<UserCredential> signUpWithEmail({
     required String email,
     required String password,
