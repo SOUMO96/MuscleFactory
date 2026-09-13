@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:ironpulse/main.dart';
+import 'package:ironpulse/core/theme/app_theme.dart';
+import 'package:ironpulse/features/onboarding/onboarding_screen.dart';
 
 void main() {
-  testWidgets('App launches and shows the splash screen', (WidgetTester tester) async {
-    await tester.pumpWidget(const IronPulseApp());
+  testWidgets('Onboarding screen renders its first slide', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.darkTheme,
+        home: const OnboardingScreen(),
+      ),
+    );
 
-    expect(find.text('IRONPULSE'), findsOneWidget);
-    expect(find.byIcon(Icons.bolt_rounded), findsOneWidget);
-
-    // Flush the splash screen's navigation timer so it doesn't leak past
-    // the end of the test.
-    await tester.pump(const Duration(milliseconds: 1800));
+    expect(find.text('Personalized\nWorkout Plans'), findsOneWidget);
+    expect(find.text('Next'), findsOneWidget);
+    expect(find.text('Get Started'), findsNothing);
   });
 }

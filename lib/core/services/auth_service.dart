@@ -34,12 +34,18 @@ class AuthService {
     return _auth.signInWithEmailAndPassword(email: email, password: password);
   }
 
-  /// Uses Firebase Auth's native web popup on web (no client ID setup
-  /// needed) and the google_sign_in plugin + credential exchange on
-  /// Android/iOS.
-  Future<UserCredential> signInWithGoogle() async {
+  /// Uses a full-page redirect on web (popups get blocked inside embedded
+  /// browser panels / webviews, e.g. an IDE's built-in preview) and the
+  /// google_sign_in plugin + credential exchange on Android/iOS.
+  ///
+  /// On web this navigates away immediately; the caller will not see this
+  /// future resolve on this page load. The app must instead pick up the
+  /// signed-in user from [authStateChanges] after the redirect returns
+  /// (see SplashScreen).
+  Future<UserCredential?> signInWithGoogle() async {
     if (kIsWeb) {
-      return _auth.signInWithPopup(GoogleAuthProvider());
+      await _auth.signInWithRedirect(GoogleAuthProvider());
+      return null;
     }
 
     final googleUser = await _googleSignIn.signIn();
