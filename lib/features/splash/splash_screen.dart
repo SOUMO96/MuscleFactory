@@ -72,7 +72,7 @@ class _SplashScreenState extends State<SplashScreen> {
               child: const Icon(Icons.bolt_rounded, color: AppColors.background, size: 52),
             ),
             const SizedBox(height: 24),
-            Text('IRONPULSE', style: AppTextStyles.display.copyWith(letterSpacing: 2)),
+            Text('MUSCLE FACTORY', style: AppTextStyles.display.copyWith(letterSpacing: 2, fontSize: 28)),
             const SizedBox(height: 8),
             Text(
               'TRAIN. TRACK. TRANSFORM.',

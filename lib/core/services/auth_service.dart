@@ -23,8 +23,17 @@ class AuthService {
     if (!kIsWeb) return null;
     try {
       final result = await _auth.getRedirectResult();
+      // ignore: avoid_print
+      print(
+        'resolvePendingRedirect: user=${result.user?.uid} '
+        'email=${result.user?.email} providerId=${result.credential?.providerId}',
+      );
       return result.user == null ? null : result;
-    } catch (_) {
+    } catch (e, st) {
+      // ignore: avoid_print
+      print('resolvePendingRedirect FAILED: $e');
+      // ignore: avoid_print
+      print(st);
       return null;
     }
   }

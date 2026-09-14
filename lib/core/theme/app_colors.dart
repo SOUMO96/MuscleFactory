@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Central color palette for IronPulse.
+/// Central color palette for Muscle Factory.
 ///
 /// Dark, high-contrast base with a neon-lime primary accent (energy,
 /// progress, "go") and an orange secondary accent (intensity, calories).

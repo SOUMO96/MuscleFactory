@@ -8,16 +8,16 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const IronPulseApp());
+  runApp(const MuscleFactoryApp());
 }
 
-class IronPulseApp extends StatelessWidget {
-  const IronPulseApp({super.key});
+class MuscleFactoryApp extends StatelessWidget {
+  const MuscleFactoryApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'IronPulse',
+      title: 'Muscle Factory',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
       darkTheme: AppTheme.darkTheme,
