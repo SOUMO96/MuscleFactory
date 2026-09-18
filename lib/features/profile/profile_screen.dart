@@ -110,11 +110,11 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         child: const Row(
                           children: [
-                            Expanded(child: _ProfileStat(value: '42', label: 'Workouts')),
+                            Expanded(child: _ProfileStat(value: '0', label: 'Workouts')),
                             _VerticalDivider(),
-                            Expanded(child: _ProfileStat(value: '6', label: 'Day Streak')),
+                            Expanded(child: _ProfileStat(value: '0', label: 'Day Streak')),
                             _VerticalDivider(),
-                            Expanded(child: _ProfileStat(value: '128', label: 'Followers')),
+                            Expanded(child: _ProfileStat(value: '0', label: 'Followers')),
                           ],
                         ),
                       ),

@@ -146,10 +146,12 @@ class DummyData {
   /// Mon..Sun relative calories burned, used by the Progress bar chart.
   static const List<double> weeklyCalories = [320, 450, 280, 510, 390, 600, 210];
 
+  /// All locked by default -- there's no real achievement-tracking system
+  /// yet, so a fresh account should not show fake progress.
   static const List<Achievement> achievements = [
-    Achievement(label: '7 Day\nStreak', icon: Icons.local_fire_department_rounded, unlocked: true),
-    Achievement(label: 'First\nWorkout', icon: Icons.emoji_events_rounded, unlocked: true),
-    Achievement(label: '10 Workouts', icon: Icons.military_tech_rounded, unlocked: true),
+    Achievement(label: '7 Day\nStreak', icon: Icons.local_fire_department_rounded, unlocked: false),
+    Achievement(label: 'First\nWorkout', icon: Icons.emoji_events_rounded, unlocked: false),
+    Achievement(label: '10 Workouts', icon: Icons.military_tech_rounded, unlocked: false),
     Achievement(label: '5K Run', icon: Icons.directions_run_rounded, unlocked: false),
     Achievement(label: '30 Day\nStreak', icon: Icons.local_fire_department_rounded, unlocked: false),
   ];

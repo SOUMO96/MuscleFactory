@@ -30,17 +30,16 @@ class HomeScreen extends StatelessWidget {
                 Expanded(
                   child: StatCard(
                     icon: Icons.local_fire_department_rounded,
-                    value: '540',
+                    value: '0',
                     label: 'Calories burned',
                     accentColor: AppColors.secondary,
-                    trend: '+12%',
                   ),
                 ),
                 SizedBox(width: 14),
                 Expanded(
                   child: StatCard(
                     icon: Icons.timer_rounded,
-                    value: '38 min',
+                    value: '0 min',
                     label: 'Active time',
                     accentColor: AppColors.primary,
                   ),
@@ -53,7 +52,7 @@ class HomeScreen extends StatelessWidget {
                 Expanded(
                   child: StatCard(
                     icon: Icons.local_fire_department_outlined,
-                    value: '6 days',
+                    value: '0 days',
                     label: 'Current streak',
                     accentColor: AppColors.warning,
                   ),
@@ -62,7 +61,7 @@ class HomeScreen extends StatelessWidget {
                 Expanded(
                   child: StatCard(
                     icon: Icons.flag_rounded,
-                    value: '3/5',
+                    value: '0/5',
                     label: 'Weekly goal',
                     accentColor: Color(0xFF2E7CF6),
                   ),
