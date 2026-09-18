@@ -16,8 +16,14 @@ class AuthService {
     // made explicit here so "stay logged in" behavior doesn't silently
     // depend on an SDK default. Native platforms always persist via the
     // OS keychain/shared prefs and don't expose this setting.
+    //
+    // Private/incognito browsing often restricts persistent storage
+    // (IndexedDB) more aggressively than normal browsing, so this call can
+    // fail there. It's not awaited (this is a constructor), so a failure
+    // would otherwise become an unhandled Future rejection -- catch it and
+    // fall back silently instead of leaving the app in a broken state.
     if (kIsWeb) {
-      _auth.setPersistence(Persistence.LOCAL);
+      _auth.setPersistence(Persistence.LOCAL).catchError((_) {});
     }
   }
 

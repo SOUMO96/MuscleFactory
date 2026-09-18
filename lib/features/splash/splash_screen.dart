@@ -37,10 +37,16 @@ class _SplashScreenState extends State<SplashScreen> {
     // first auth-state event. This covers both cases: a user returning
     // from Google sign-in, and a returning user whose previous session
     // was simply restored from local persistence (auto login).
+    //
+    // Guarded with a timeout: some browser contexts (private/incognito
+    // browsing with storage restrictions) can leave Firebase Auth's
+    // initialization hanging indefinitely. Better to fall through to the
+    // logged-out flow than get the user stuck on this screen forever.
     final authReady = () async {
       await AuthService.instance.resolvePendingRedirect();
       await AuthService.instance.authStateChanges.first;
-    }();
+    }()
+        .timeout(const Duration(seconds: 6), onTimeout: () {});
 
     await Future.wait([minSplashTime, authReady]);
 
