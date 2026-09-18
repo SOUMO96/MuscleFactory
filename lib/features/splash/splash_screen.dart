@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/navigation/main_shell.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/user_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../auth/reset_password_screen.dart';
 import '../onboarding/onboarding_screen.dart';
 import '../survey/survey_screen.dart';
 
@@ -35,14 +37,25 @@ class _SplashScreenState extends State<SplashScreen> {
     // browsing with storage restrictions) can leave auth initialization
     // hanging indefinitely. Better to fall through to the logged-out flow
     // than get the user stuck on this screen forever.
-    final authReady = AuthService.instance.authStateChanges.first.timeout(
-      const Duration(seconds: 6),
-      onTimeout: () => null,
-    );
+    AuthChangeEvent? lastEvent;
+    final authReady = AuthService.instance.authStateEvents.first.then((state) {
+      lastEvent = state.event;
+    }).timeout(const Duration(seconds: 6), onTimeout: () {});
 
     await Future.wait([minSplashTime, authReady]);
 
     if (!mounted) return;
+
+    // A "forgot password" email link signs the user in (it proves email
+    // ownership) but they still don't know a working password -- show the
+    // set-new-password screen instead of just letting them into the app.
+    if (lastEvent == AuthChangeEvent.passwordRecovery) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const ResetPasswordScreen()),
+      );
+      return;
+    }
+
     final user = AuthService.instance.currentUser;
     if (user == null) {
       Navigator.of(context).pushReplacement(

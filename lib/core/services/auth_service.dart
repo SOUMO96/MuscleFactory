@@ -9,6 +9,14 @@ class AuthService {
   final GoTrueClient _auth = Supabase.instance.client.auth;
 
   Stream<User?> get authStateChanges => _auth.onAuthStateChange.map((state) => state.session?.user);
+
+  /// Raw auth state stream, event included -- needed to detect
+  /// [AuthChangeEvent.passwordRecovery] specifically (clicking a "forgot
+  /// password" email link signs the user in, but the app must show a
+  /// "set a new password" screen at that point rather than just letting
+  /// them into the app with their old/forgotten password still active).
+  Stream<AuthState> get authStateEvents => _auth.onAuthStateChange;
+
   User? get currentUser => _auth.currentUser;
 
   Future<AuthResponse> signUpWithEmail({
@@ -46,6 +54,13 @@ class AuthService {
 
   Future<void> sendPasswordResetEmail(String email) {
     return _auth.resetPasswordForEmail(email);
+  }
+
+  /// Sets a new password on the currently signed-in user -- used after a
+  /// password-recovery link has already established a session (see
+  /// [ResetPasswordScreen]).
+  Future<void> updateOwnPassword(String newPassword) {
+    return _auth.updateUser(UserAttributes(password: newPassword));
   }
 
   /// True if [error] is Supabase's "email not confirmed" rejection --
