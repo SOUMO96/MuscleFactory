@@ -50,6 +50,30 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: AppColors.success),
+    );
+  }
+
+  Future<void> _forgotPassword() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
+      _showError('Enter your email above first, then tap "Forgot password?".');
+      return;
+    }
+
+    setState(() => _loading = true);
+    try {
+      await AuthService.instance.sendPasswordResetEmail(email);
+      _showMessage('Password reset email sent. Check your inbox.');
+    } catch (e) {
+      _showError(AuthService.instance.messageForError(e));
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
   Future<void> _login() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
@@ -138,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: _loading ? null : _forgotPassword,
                   child: Text('Forgot password?', style: AppTextStyles.bodySmall.copyWith(color: AppColors.primary)),
                 ),
               ),

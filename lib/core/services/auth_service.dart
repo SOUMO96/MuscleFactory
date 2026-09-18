@@ -88,6 +88,14 @@ class AuthService {
     return _auth.signInWithCredential(credential);
   }
 
+  /// Sends a password-reset email. This also works for accounts that were
+  /// created via Google Sign-In and never had a password set -- resetting
+  /// establishes a password credential on that same account, letting the
+  /// user log in with email/password afterwards too.
+  Future<void> sendPasswordResetEmail(String email) {
+    return _auth.sendPasswordResetEmail(email: email);
+  }
+
   Future<void> signOut() async {
     await _auth.signOut();
     if (!kIsWeb) {
@@ -108,7 +116,8 @@ class AuthService {
         case 'wrong-password':
           return 'Incorrect password.';
         case 'email-already-in-use':
-          return 'An account already exists with that email.';
+          return 'An account already exists with that email. Try logging in, '
+              "or use 'Forgot password?' if you signed up with Google.";
         case 'weak-password':
           return 'Choose a stronger password (at least 6 characters).';
         case 'invalid-credential':
