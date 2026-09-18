@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../core/services/auth_service.dart';
-import '../../core/services/user_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/primary_button.dart';
-import '../../shared/models/app_user.dart';
 import '../survey/survey_screen.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -53,24 +51,13 @@ class _SignupScreenState extends State<SignupScreen> {
 
     setState(() => _loading = true);
     try {
-      final credential = await AuthService.instance.signUpWithEmail(
+      await AuthService.instance.signUpWithEmail(
         email: email,
         password: password,
         displayName: name,
       );
-
-      final user = credential.user;
-      if (user != null) {
-        await UserRepository.instance.createUserProfile(
-          AppUser(
-            uid: user.uid,
-            email: email,
-            displayName: name,
-            photoUrl: user.photoURL,
-            createdAt: DateTime.now(),
-          ),
-        );
-      }
+      // No manual profile creation needed -- a database trigger creates
+      // the profiles row automatically as soon as the auth user exists.
 
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(

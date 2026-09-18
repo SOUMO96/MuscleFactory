@@ -20,12 +20,10 @@ class ProfileScreen extends StatelessWidget {
         child: user == null
             ? const SizedBox.shrink()
             : StreamBuilder<AppUser?>(
-                stream: UserRepository.instance.watchUserProfile(user.uid),
+                stream: UserRepository.instance.watchUserProfile(user.id),
                 builder: (context, snapshot) {
                   final profile = snapshot.data;
-                  final displayName = (profile?.displayName.trim().isNotEmpty ?? false)
-                      ? profile!.displayName
-                      : ((user.displayName?.trim().isNotEmpty ?? false) ? user.displayName! : 'Athlete');
+                  final displayName = (profile?.displayName.trim().isNotEmpty ?? false) ? profile!.displayName : 'Athlete';
                   final email = profile?.email ?? user.email ?? '';
                   final initials = displayName
                       .trim()

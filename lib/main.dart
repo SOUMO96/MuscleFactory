@@ -1,13 +1,16 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/theme/app_theme.dart';
 import 'features/splash/splash_screen.dart';
-import 'firebase_options.dart';
+import 'supabase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Supabase.initialize(
+    url: SupabaseOptions.url,
+    publishableKey: SupabaseOptions.publishableKey,
+  );
   runApp(const MuscleFactoryApp());
 }
 

@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 enum FitnessGoal { gainWeight, loseWeight, stayFit }
 
 extension FitnessGoalLabel on FitnessGoal {
@@ -19,7 +17,8 @@ extension FitnessGoalLabel on FitnessGoal {
   }
 }
 
-/// A user's profile document stored in Firestore at `users/{uid}`.
+/// A user's profile row, stored in Supabase Postgres at `public.profiles`
+/// (one row per `auth.users` row, primary key `id`).
 class AppUser {
   const AppUser({
     required this.uid,
@@ -53,35 +52,19 @@ class AppUser {
   final int? goalDurationWeeks;
   final bool surveyCompleted;
 
-  Map<String, dynamic> toMap() => {
-        'uid': uid,
-        'email': email,
-        'displayName': displayName,
-        'photoUrl': photoUrl,
-        'createdAt': Timestamp.fromDate(createdAt),
-        'age': age,
-        'gender': gender,
-        'heightCm': heightCm,
-        'currentWeightKg': currentWeightKg,
-        'goal': goal?.storageValue,
-        'targetWeightKg': targetWeightKg,
-        'goalDurationWeeks': goalDurationWeeks,
-        'surveyCompleted': surveyCompleted,
-      };
-
   factory AppUser.fromMap(Map<String, dynamic> map) => AppUser(
-        uid: map['uid'] as String,
-        email: map['email'] as String,
-        displayName: (map['displayName'] as String?) ?? 'Athlete',
-        photoUrl: map['photoUrl'] as String?,
-        createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+        uid: map['id'] as String,
+        email: map['email'] as String? ?? '',
+        displayName: (map['display_name'] as String?) ?? 'Athlete',
+        photoUrl: map['photo_url'] as String?,
+        createdAt: map['created_at'] == null ? DateTime.now() : DateTime.parse(map['created_at'] as String),
         age: map['age'] as int?,
         gender: map['gender'] as String?,
-        heightCm: (map['heightCm'] as num?)?.toDouble(),
-        currentWeightKg: (map['currentWeightKg'] as num?)?.toDouble(),
+        heightCm: (map['height_cm'] as num?)?.toDouble(),
+        currentWeightKg: (map['current_weight_kg'] as num?)?.toDouble(),
         goal: FitnessGoalLabel.fromStorage(map['goal'] as String?),
-        targetWeightKg: (map['targetWeightKg'] as num?)?.toDouble(),
-        goalDurationWeeks: map['goalDurationWeeks'] as int?,
-        surveyCompleted: map['surveyCompleted'] as bool? ?? false,
+        targetWeightKg: (map['target_weight_kg'] as num?)?.toDouble(),
+        goalDurationWeeks: map['goal_duration_weeks'] as int?,
+        surveyCompleted: map['survey_completed'] as bool? ?? false,
       );
 }

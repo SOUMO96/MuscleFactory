@@ -33,7 +33,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
         child: user == null
             ? const SizedBox.shrink()
             : StreamBuilder<AppUser?>(
-                stream: UserRepository.instance.watchUserProfile(user.uid),
+                stream: UserRepository.instance.watchUserProfile(user.id),
                 builder: (context, snapshot) {
                   final profile = snapshot.data;
                   return _buildContent(context, profile);

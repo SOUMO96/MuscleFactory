@@ -1,53 +1,36 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../shared/models/app_user.dart';
 
-/// Reads and writes user profile documents in Firestore.
+/// Reads and writes profile rows in Supabase Postgres (`public.profiles`).
+///
+/// Row creation itself is handled automatically by a database trigger
+/// (see supabase/migrations/) whenever a new auth user is created, for
+/// both email/password sign-up and Google sign-in alike.
 class UserRepository {
   UserRepository._();
   static final UserRepository instance = UserRepository._();
 
-  final CollectionReference<Map<String, dynamic>> _users =
-      FirebaseFirestore.instance.collection('users');
-
-  Future<void> createUserProfile(AppUser user) {
-    return _users.doc(user.uid).set(user.toMap(), SetOptions(merge: true));
-  }
+  SupabaseQueryBuilder get _profiles => Supabase.instance.client.from('profiles');
 
   Future<AppUser?> getUserProfile(String uid) async {
-    final doc = await _users.doc(uid).get();
-    final data = doc.data();
-    if (data == null) return null;
-    return AppUser.fromMap(data);
+    final row = await _profiles.select().eq('id', uid).maybeSingle();
+    if (row == null) return null;
+    return AppUser.fromMap(row);
   }
 
   Stream<AppUser?> watchUserProfile(String uid) {
-    return _users.doc(uid).snapshots().map((doc) {
-      final data = doc.data();
-      return data == null ? null : AppUser.fromMap(data);
-    });
+    return _profiles.stream(primaryKey: ['id']).eq('id', uid).map(
+          (rows) => rows.isEmpty ? null : AppUser.fromMap(rows.first),
+        );
   }
 
-  /// Ensures a Firestore profile document exists for [user] (creating a
-  /// bare-bones one from their Firebase Auth info if this is their first
-  /// time), and reports whether they've already completed the onboarding
-  /// survey. Call this right after any successful sign-in/sign-up to
-  /// decide whether to route to the survey or straight into the app.
-  Future<bool> ensureProfile(User user) async {
-    final existing = await getUserProfile(user.uid);
-    if (existing != null) return existing.surveyCompleted;
-
-    await createUserProfile(
-      AppUser(
-        uid: user.uid,
-        email: user.email ?? '',
-        displayName: (user.displayName?.trim().isNotEmpty ?? false) ? user.displayName! : 'Athlete',
-        photoUrl: user.photoURL,
-        createdAt: DateTime.now(),
-      ),
-    );
-    return false;
+  /// Reports whether [uid] has completed the onboarding survey. The
+  /// profile row itself always exists by the time this is called (created
+  /// by the database trigger as part of sign-up), so this is just a read.
+  Future<bool> ensureProfile(String uid) async {
+    final profile = await getUserProfile(uid);
+    return profile?.surveyCompleted ?? false;
   }
 
   Future<void> saveSurveyResults({
@@ -61,16 +44,16 @@ class UserRepository {
     required double targetWeightKg,
     required int goalDurationWeeks,
   }) {
-    return _users.doc(uid).set({
-      'displayName': name,
+    return _profiles.update({
+      'display_name': name,
       'age': age,
       'gender': gender,
-      'heightCm': heightCm,
-      'currentWeightKg': currentWeightKg,
+      'height_cm': heightCm,
+      'current_weight_kg': currentWeightKg,
       'goal': goal.storageValue,
-      'targetWeightKg': targetWeightKg,
-      'goalDurationWeeks': goalDurationWeeks,
-      'surveyCompleted': true,
-    }, SetOptions(merge: true));
+      'target_weight_kg': targetWeightKg,
+      'goal_duration_weeks': goalDurationWeeks,
+      'survey_completed': true,
+    }).eq('id', uid);
   }
 }

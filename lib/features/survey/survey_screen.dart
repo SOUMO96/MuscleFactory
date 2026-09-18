@@ -15,7 +15,7 @@ const _pageCount = 7;
 /// One-time onboarding survey shown right after a user's first successful
 /// sign-up/sign-in (see UserRepository.ensureProfile). One question per
 /// page: name, age, gender, height, current weight, goal, target weight +
-/// duration -- then writes it all to the user's Firestore profile and
+/// duration -- then writes it all to the user's Supabase profile row and
 /// marks the survey complete.
 class SurveyScreen extends StatefulWidget {
   const SurveyScreen({super.key});
@@ -47,8 +47,14 @@ class _SurveyScreenState extends State<SurveyScreen> {
   @override
   void initState() {
     super.initState();
+    _nameController = TextEditingController();
     final user = AuthService.instance.currentUser;
-    _nameController = TextEditingController(text: user?.displayName ?? '');
+    if (user != null) {
+      UserRepository.instance.getUserProfile(user.id).then((profile) {
+        if (!mounted || profile == null) return;
+        _nameController.text = profile.displayName == 'Athlete' ? '' : profile.displayName;
+      });
+    }
   }
 
   @override
@@ -123,7 +129,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
     setState(() => _loading = true);
     try {
       await UserRepository.instance.saveSurveyResults(
-        uid: user.uid,
+        uid: user.id,
         name: name,
         age: _age,
         gender: _gender!,
@@ -133,12 +139,6 @@ class _SurveyScreenState extends State<SurveyScreen> {
         targetWeightKg: _targetWeightKg,
         goalDurationWeeks: _durationWeeks,
       );
-      // Keep Firebase Auth's displayName in sync so anywhere in the app
-      // that reads it directly (rather than the Firestore profile) still
-      // shows the name the user just confirmed here.
-      if (user.displayName != name) {
-        await user.updateDisplayName(name);
-      }
 
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(

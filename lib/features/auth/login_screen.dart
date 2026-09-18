@@ -36,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
     // routing for that case once the redirect comes back.
     if (user == null) return;
 
-    final surveyDone = await UserRepository.instance.ensureProfile(user);
+    final surveyDone = await UserRepository.instance.ensureProfile(user.id);
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => surveyDone ? const MainShell() : const SurveyScreen()),

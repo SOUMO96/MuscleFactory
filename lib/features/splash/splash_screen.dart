@@ -10,12 +10,10 @@ import '../survey/survey_screen.dart';
 
 /// App boot screen: brand mark, tagline, then routes based on auth state.
 ///
-/// First resolves any pending signInWithRedirect result (Google sign-in
-/// uses a full-page redirect rather than a popup, since popups get
-/// blocked inside embedded browser panels/webviews) before trusting
-/// [AuthService.currentUser] — the redirect reloads the whole page, and
-/// Firebase needs a moment after boot to finish processing the returning
-/// auth result.
+/// Waits for Supabase's first auth-state event before trusting
+/// [AuthService.currentUser] -- this covers both a user returning from a
+/// Google sign-in redirect and a returning user whose session was simply
+/// restored from local persistence (auto login).
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -33,20 +31,14 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _bootstrap() async {
     final minSplashTime = Future<void>.delayed(const Duration(milliseconds: 1800));
 
-    // Resolve any pending OAuth redirect first, then wait for Firebase's
-    // first auth-state event. This covers both cases: a user returning
-    // from Google sign-in, and a returning user whose previous session
-    // was simply restored from local persistence (auto login).
-    //
     // Guarded with a timeout: some browser contexts (private/incognito
-    // browsing with storage restrictions) can leave Firebase Auth's
-    // initialization hanging indefinitely. Better to fall through to the
-    // logged-out flow than get the user stuck on this screen forever.
-    final authReady = () async {
-      await AuthService.instance.resolvePendingRedirect();
-      await AuthService.instance.authStateChanges.first;
-    }()
-        .timeout(const Duration(seconds: 6), onTimeout: () {});
+    // browsing with storage restrictions) can leave auth initialization
+    // hanging indefinitely. Better to fall through to the logged-out flow
+    // than get the user stuck on this screen forever.
+    final authReady = AuthService.instance.authStateChanges.first.timeout(
+      const Duration(seconds: 6),
+      onTimeout: () => null,
+    );
 
     await Future.wait([minSplashTime, authReady]);
 
@@ -59,7 +51,7 @@ class _SplashScreenState extends State<SplashScreen> {
       return;
     }
 
-    final surveyDone = await UserRepository.instance.ensureProfile(user);
+    final surveyDone = await UserRepository.instance.ensureProfile(user.id);
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(

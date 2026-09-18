@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../core/services/auth_service.dart';
+import '../../core/services/user_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/section_header.dart';
 import '../../core/widgets/stat_card.dart';
 import '../../core/widgets/workout_card.dart';
 import '../../shared/data/dummy_data.dart';
+import '../../shared/models/app_user.dart';
 import '../workouts/workout_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -109,16 +111,34 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = AuthService.instance.currentUser;
-    final displayName = (user?.displayName?.trim().isNotEmpty ?? false) ? user!.displayName! : 'Athlete';
-    final firstName = displayName.split(RegExp(r'\s+')).first;
-    final initials = displayName
-        .trim()
-        .split(RegExp(r'\s+'))
-        .where((part) => part.isNotEmpty)
-        .take(2)
-        .map((part) => part[0].toUpperCase())
-        .join();
+    if (user == null) return const SizedBox.shrink();
 
+    return StreamBuilder<AppUser?>(
+      stream: UserRepository.instance.watchUserProfile(user.id),
+      builder: (context, snapshot) {
+        final displayName = (snapshot.data?.displayName.trim().isNotEmpty ?? false) ? snapshot.data!.displayName : 'Athlete';
+        final firstName = displayName.split(RegExp(r'\s+')).first;
+        final initials = displayName
+            .trim()
+            .split(RegExp(r'\s+'))
+            .where((part) => part.isNotEmpty)
+            .take(2)
+            .map((part) => part[0].toUpperCase())
+            .join();
+
+        return _HeaderContent(firstName: firstName, initials: initials);
+      },
+    );
+  }
+}
+
+class _HeaderContent extends StatelessWidget {
+  const _HeaderContent({required this.firstName, required this.initials});
+  final String firstName;
+  final String initials;
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
