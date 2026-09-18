@@ -8,6 +8,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/primary_button.dart';
 import '../survey/survey_screen.dart';
 import 'signup_screen.dart';
+import 'verify_email_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -87,6 +88,13 @@ class _LoginScreenState extends State<LoginScreen> {
       await AuthService.instance.signInWithEmail(email: email, password: password);
       await _goToApp();
     } catch (e) {
+      if (AuthService.instance.isEmailNotConfirmed(e)) {
+        if (!mounted) return;
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => VerifyEmailScreen(email: email)),
+        );
+        return;
+      }
       _showError(AuthService.instance.messageForError(e));
     } finally {
       if (mounted) setState(() => _loading = false);

@@ -48,6 +48,29 @@ class AuthService {
     return _auth.resetPasswordForEmail(email);
   }
 
+  /// True if [error] is Supabase's "email not confirmed" rejection --
+  /// callers use this to route to [VerifyEmailScreen] (see
+  /// features/auth/verify_email_screen.dart) instead of just showing an
+  /// error.
+  bool isEmailNotConfirmed(Object error) {
+    if (error is! AuthException) return false;
+    return error.code == 'email_not_confirmed' || error.message.toLowerCase().contains('email not confirmed');
+  }
+
+  /// Confirms a pending sign-up using the 6-digit code emailed to the
+  /// user. Returns an active session on success.
+  Future<AuthResponse> verifySignupCode({
+    required String email,
+    required String code,
+  }) {
+    return _auth.verifyOTP(email: email, token: code, type: OtpType.signup);
+  }
+
+  /// Re-sends the signup verification code.
+  Future<void> resendSignupCode(String email) {
+    return _auth.resend(type: OtpType.signup, email: email);
+  }
+
   /// Turns a Supabase error into copy that's safe to show a user.
   String messageForError(Object error) {
     if (error is AuthException) {

@@ -4,7 +4,7 @@ import '../../core/services/auth_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/primary_button.dart';
-import '../survey/survey_screen.dart';
+import 'verify_email_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -58,10 +58,12 @@ class _SignupScreenState extends State<SignupScreen> {
       );
       // No manual profile creation needed -- a database trigger creates
       // the profiles row automatically as soon as the auth user exists.
+      // The account needs a verification code before it's usable, so this
+      // doesn't have a session yet -- that's handled after VerifyEmailScreen.
 
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const SurveyScreen()),
+        MaterialPageRoute(builder: (_) => VerifyEmailScreen(email: email)),
         (route) => false,
       );
     } catch (e) {
