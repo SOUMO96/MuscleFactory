@@ -56,14 +56,20 @@ class UserRepository {
     required int age,
     required String gender,
     required double heightCm,
+    required double currentWeightKg,
     required FitnessGoal goal,
+    required double targetWeightKg,
+    required int goalDurationWeeks,
   }) {
     return _users.doc(uid).set({
       'displayName': name,
       'age': age,
       'gender': gender,
       'heightCm': heightCm,
+      'currentWeightKg': currentWeightKg,
       'goal': goal.storageValue,
+      'targetWeightKg': targetWeightKg,
+      'goalDurationWeeks': goalDurationWeeks,
       'surveyCompleted': true,
     }, SetOptions(merge: true));
   }

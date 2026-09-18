@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/services/auth_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/section_header.dart';
@@ -72,13 +73,17 @@ class HomeScreen extends StatelessWidget {
             FeaturedWorkoutCard(
               workout: featured,
               onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => WorkoutDetailScreen(workout: featured)),
+                MaterialPageRoute(
+                    builder: (_) => WorkoutDetailScreen(workout: featured)),
               ),
             ),
             const SizedBox(height: 28),
             const _QuickActionsRow(),
             const SizedBox(height: 28),
-            SectionHeader(title: 'Recommended For You', actionLabel: 'See all', onAction: () {}),
+            SectionHeader(
+                title: 'Recommended For You',
+                actionLabel: 'See all',
+                onAction: () {}),
             const SizedBox(height: 14),
             ...recommended.map(
               (w) => Padding(
@@ -86,7 +91,8 @@ class HomeScreen extends StatelessWidget {
                 child: WorkoutCard(
                   workout: w,
                   onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => WorkoutDetailScreen(workout: w)),
+                    MaterialPageRoute(
+                        builder: (_) => WorkoutDetailScreen(workout: w)),
                   ),
                 ),
               ),
@@ -103,6 +109,17 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = AuthService.instance.currentUser;
+    final displayName = (user?.displayName?.trim().isNotEmpty ?? false) ? user!.displayName! : 'Athlete';
+    final firstName = displayName.split(RegExp(r'\s+')).first;
+    final initials = displayName
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((part) => part.isNotEmpty)
+        .take(2)
+        .map((part) => part[0].toUpperCase())
+        .join();
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -111,7 +128,7 @@ class _Header extends StatelessWidget {
           children: [
             Text('Good Morning 👋', style: AppTextStyles.bodyMedium),
             const SizedBox(height: 4),
-            Text('Alex Johnson', style: AppTextStyles.h1.copyWith(fontSize: 22)),
+            Text(firstName, style: AppTextStyles.h1.copyWith(fontSize: 22)),
           ],
         ),
         Row(
@@ -122,12 +139,13 @@ class _Header extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: AppColors.primaryGradient),
+                gradient:
+                    const LinearGradient(colors: AppColors.primaryGradient),
                 borderRadius: BorderRadius.circular(14),
               ),
               alignment: Alignment.center,
               child: Text(
-                'AJ',
+                initials.isEmpty ? '?' : initials,
                 style: AppTextStyles.h3.copyWith(color: AppColors.background),
               ),
             ),

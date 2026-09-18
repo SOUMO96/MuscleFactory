@@ -10,12 +10,13 @@ import '../../shared/models/app_user.dart';
 
 enum _HeightUnit { cm, ft }
 
-const _pageCount = 5;
+const _pageCount = 7;
 
 /// One-time onboarding survey shown right after a user's first successful
 /// sign-up/sign-in (see UserRepository.ensureProfile). One question per
-/// page: name, age, gender, height, goal -- then writes it all to the
-/// user's Firestore profile and marks the survey complete.
+/// page: name, age, gender, height, current weight, goal, target weight +
+/// duration -- then writes it all to the user's Firestore profile and
+/// marks the survey complete.
 class SurveyScreen extends StatefulWidget {
   const SurveyScreen({super.key});
 
@@ -39,6 +40,10 @@ class _SurveyScreenState extends State<SurveyScreen> {
   int _feet = 5;
   int _inches = 7;
 
+  double _currentWeightKg = 70;
+  double _targetWeightKg = 70;
+  int _durationWeeks = 12;
+
   @override
   void initState() {
     super.initState();
@@ -56,6 +61,21 @@ class _SurveyScreenState extends State<SurveyScreen> {
   double get _heightInCm {
     if (_unit == _HeightUnit.cm) return _heightCm.toDouble();
     return (_feet * 30.48) + (_inches * 2.54);
+  }
+
+  void _selectGoal(FitnessGoal goal) {
+    setState(() {
+      _goal = goal;
+      // Suggest a sensible starting target the user can fine-tune.
+      switch (goal) {
+        case FitnessGoal.gainWeight:
+          _targetWeightKg = _currentWeightKg + 5;
+        case FitnessGoal.loseWeight:
+          _targetWeightKg = (_currentWeightKg - 5).clamp(30, 300);
+        case FitnessGoal.stayFit:
+          _targetWeightKg = _currentWeightKg;
+      }
+    });
   }
 
   void _showError(String message) {
@@ -98,16 +118,28 @@ class _SurveyScreenState extends State<SurveyScreen> {
       return;
     }
 
+    final name = _nameController.text.trim();
+
     setState(() => _loading = true);
     try {
       await UserRepository.instance.saveSurveyResults(
         uid: user.uid,
-        name: _nameController.text.trim(),
+        name: name,
         age: _age,
         gender: _gender!,
         heightCm: _heightInCm,
+        currentWeightKg: _currentWeightKg,
         goal: _goal!,
+        targetWeightKg: _targetWeightKg,
+        goalDurationWeeks: _durationWeeks,
       );
+      // Keep Firebase Auth's displayName in sync so anywhere in the app
+      // that reads it directly (rather than the Firestore profile) still
+      // shows the name the user just confirmed here.
+      if (user.displayName != name) {
+        await user.updateDisplayName(name);
+      }
+
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const MainShell()),
@@ -184,12 +216,13 @@ class _SurveyScreenState extends State<SurveyScreen> {
                     icon: Icons.cake_outlined,
                     title: 'How old are you?',
                     subtitle: 'This helps us tailor your plan.',
-                    child: _BigStepper(
-                      value: _age,
+                    child: _Stepper(
+                      value: _age.toDouble(),
                       unit: 'years',
                       min: 13,
                       max: 99,
-                      onChanged: (v) => setState(() => _age = v),
+                      step: 1,
+                      onChanged: (v) => setState(() => _age = v.round()),
                     ),
                   ),
                   _QuestionPage(
@@ -227,38 +260,54 @@ class _SurveyScreenState extends State<SurveyScreen> {
                         _UnitToggle(unit: _unit, onChanged: (u) => setState(() => _unit = u)),
                         const SizedBox(height: 24),
                         if (_unit == _HeightUnit.cm)
-                          _BigStepper(
-                            value: _heightCm,
+                          _Stepper(
+                            value: _heightCm.toDouble(),
                             unit: 'cm',
                             min: 100,
                             max: 230,
-                            onChanged: (v) => setState(() => _heightCm = v),
+                            step: 1,
+                            onChanged: (v) => setState(() => _heightCm = v.round()),
                           )
                         else
                           Row(
                             children: [
                               Expanded(
-                                child: _BigStepper(
-                                  value: _feet,
+                                child: _Stepper(
+                                  value: _feet.toDouble(),
                                   unit: 'ft',
                                   min: 3,
                                   max: 7,
-                                  onChanged: (v) => setState(() => _feet = v),
+                                  step: 1,
+                                  onChanged: (v) => setState(() => _feet = v.round()),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
-                                child: _BigStepper(
-                                  value: _inches,
+                                child: _Stepper(
+                                  value: _inches.toDouble(),
                                   unit: 'in',
                                   min: 0,
                                   max: 11,
-                                  onChanged: (v) => setState(() => _inches = v),
+                                  step: 1,
+                                  onChanged: (v) => setState(() => _inches = v.round()),
                                 ),
                               ),
                             ],
                           ),
                       ],
+                    ),
+                  ),
+                  _QuestionPage(
+                    icon: Icons.monitor_weight_outlined,
+                    title: "What's your current weight?",
+                    subtitle: 'Your starting point.',
+                    child: _Stepper(
+                      value: _currentWeightKg,
+                      unit: 'kg',
+                      min: 30,
+                      max: 200,
+                      step: 0.5,
+                      onChanged: (v) => setState(() => _currentWeightKg = v),
                     ),
                   ),
                   _QuestionPage(
@@ -272,7 +321,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
                           label: FitnessGoal.gainWeight.label,
                           subtitle: 'Build muscle and increase body weight',
                           selected: _goal == FitnessGoal.gainWeight,
-                          onTap: () => setState(() => _goal = FitnessGoal.gainWeight),
+                          onTap: () => _selectGoal(FitnessGoal.gainWeight),
                         ),
                         const SizedBox(height: 10),
                         _GoalCard(
@@ -280,7 +329,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
                           label: FitnessGoal.loseWeight.label,
                           subtitle: 'Burn fat and reduce body weight',
                           selected: _goal == FitnessGoal.loseWeight,
-                          onTap: () => setState(() => _goal = FitnessGoal.loseWeight),
+                          onTap: () => _selectGoal(FitnessGoal.loseWeight),
                         ),
                         const SizedBox(height: 10),
                         _GoalCard(
@@ -288,7 +337,37 @@ class _SurveyScreenState extends State<SurveyScreen> {
                           label: FitnessGoal.stayFit.label,
                           subtitle: 'Maintain your current shape and health',
                           selected: _goal == FitnessGoal.stayFit,
-                          onTap: () => setState(() => _goal = FitnessGoal.stayFit),
+                          onTap: () => _selectGoal(FitnessGoal.stayFit),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _QuestionPage(
+                    icon: Icons.emoji_events_outlined,
+                    title: 'Set your target',
+                    subtitle: 'What weight, and by when?',
+                    child: Column(
+                      children: [
+                        Text('TARGET WEIGHT', style: AppTextStyles.caption),
+                        const SizedBox(height: 10),
+                        _Stepper(
+                          value: _targetWeightKg,
+                          unit: 'kg',
+                          min: 30,
+                          max: 200,
+                          step: 0.5,
+                          onChanged: (v) => setState(() => _targetWeightKg = v),
+                        ),
+                        const SizedBox(height: 24),
+                        Text('TIMEFRAME', style: AppTextStyles.caption),
+                        const SizedBox(height: 10),
+                        _Stepper(
+                          value: _durationWeeks.toDouble(),
+                          unit: 'weeks',
+                          min: 1,
+                          max: 52,
+                          step: 1,
+                          onChanged: (v) => setState(() => _durationWeeks = v.round()),
                         ),
                       ],
                     ),
@@ -363,20 +442,27 @@ class _QuestionPage extends StatelessWidget {
   }
 }
 
-class _BigStepper extends StatelessWidget {
-  const _BigStepper({
+/// A -/+ stepper for a numeric value. Supports fractional [step]s (e.g.
+/// 0.5 for weight); the displayed value drops the decimal when [step] is
+/// a whole number.
+class _Stepper extends StatelessWidget {
+  const _Stepper({
     required this.value,
     required this.unit,
     required this.min,
     required this.max,
+    required this.step,
     required this.onChanged,
   });
 
-  final int value;
+  final double value;
   final String unit;
-  final int min;
-  final int max;
-  final ValueChanged<int> onChanged;
+  final double min;
+  final double max;
+  final double step;
+  final ValueChanged<double> onChanged;
+
+  String get _display => step >= 1 ? value.round().toString() : value.toStringAsFixed(1);
 
   @override
   Widget build(BuildContext context) {
@@ -390,14 +476,14 @@ class _BigStepper extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _stepButton(Icons.remove_rounded, value > min ? () => onChanged(value - 1) : null),
+          _stepButton(Icons.remove_rounded, value > min ? () => onChanged(value - step) : null),
           Column(
             children: [
-              Text('$value', style: AppTextStyles.display.copyWith(fontSize: 40)),
+              Text(_display, style: AppTextStyles.display.copyWith(fontSize: 40)),
               Text(unit, style: AppTextStyles.bodyMedium),
             ],
           ),
-          _stepButton(Icons.add_rounded, value < max ? () => onChanged(value + 1) : null),
+          _stepButton(Icons.add_rounded, value < max ? () => onChanged(value + step) : null),
         ],
       ),
     );
@@ -468,14 +554,14 @@ class _UnitToggle extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _segment('Centimeters', 'cm', _HeightUnit.cm),
-          _segment('Feet & Inches', 'ft', _HeightUnit.ft),
+          _segment('cm', _HeightUnit.cm),
+          _segment('ft', _HeightUnit.ft),
         ],
       ),
     );
   }
 
-  Widget _segment(String tooltip, String label, _HeightUnit value) {
+  Widget _segment(String label, _HeightUnit value) {
     final selected = unit == value;
     return GestureDetector(
       onTap: () => onChanged(value),

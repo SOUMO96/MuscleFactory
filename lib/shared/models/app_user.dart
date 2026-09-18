@@ -30,7 +30,10 @@ class AppUser {
     this.age,
     this.gender,
     this.heightCm,
+    this.currentWeightKg,
     this.goal,
+    this.targetWeightKg,
+    this.goalDurationWeeks,
     this.surveyCompleted = false,
   });
 
@@ -44,7 +47,10 @@ class AppUser {
   final int? age;
   final String? gender;
   final double? heightCm;
+  final double? currentWeightKg;
   final FitnessGoal? goal;
+  final double? targetWeightKg;
+  final int? goalDurationWeeks;
   final bool surveyCompleted;
 
   Map<String, dynamic> toMap() => {
@@ -56,7 +62,10 @@ class AppUser {
         'age': age,
         'gender': gender,
         'heightCm': heightCm,
+        'currentWeightKg': currentWeightKg,
         'goal': goal?.storageValue,
+        'targetWeightKg': targetWeightKg,
+        'goalDurationWeeks': goalDurationWeeks,
         'surveyCompleted': surveyCompleted,
       };
 
@@ -69,7 +78,10 @@ class AppUser {
         age: map['age'] as int?,
         gender: map['gender'] as String?,
         heightCm: (map['heightCm'] as num?)?.toDouble(),
+        currentWeightKg: (map['currentWeightKg'] as num?)?.toDouble(),
         goal: FitnessGoalLabel.fromStorage(map['goal'] as String?),
+        targetWeightKg: (map['targetWeightKg'] as num?)?.toDouble(),
+        goalDurationWeeks: map['goalDurationWeeks'] as int?,
         surveyCompleted: map['surveyCompleted'] as bool? ?? false,
       );
 }
