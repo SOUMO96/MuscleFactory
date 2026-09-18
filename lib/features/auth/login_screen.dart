@@ -11,7 +11,13 @@ import 'signup_screen.dart';
 import 'verify_email_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({super.key, this.initialErrorMessage});
+
+  /// Shown once, right after the first frame -- used when SplashScreen
+  /// detects an `?error=...` redirect (e.g. an expired/already-used
+  /// password reset link) so the user sees a plain explanation instead
+  /// of just landing here with no context.
+  final String? initialErrorMessage;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -22,6 +28,17 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _obscure = true;
   bool _loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final message = widget.initialErrorMessage;
+    if (message != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _showError(message);
+      });
+    }
+  }
 
   @override
   void dispose() {
