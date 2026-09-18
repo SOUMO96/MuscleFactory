@@ -5,11 +5,21 @@ import 'package:google_sign_in/google_sign_in.dart';
 /// Thin wrapper around Firebase Auth (+ Google Sign-In) so the UI layer
 /// never talks to the Firebase SDKs directly.
 class AuthService {
-  AuthService._();
   static final AuthService instance = AuthService._();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  AuthService._() {
+    // Explicitly keep users signed in across browser restarts (not just
+    // page refreshes/tabs). This is the default on web already, but it's
+    // made explicit here so "stay logged in" behavior doesn't silently
+    // depend on an SDK default. Native platforms always persist via the
+    // OS keychain/shared prefs and don't expose this setting.
+    if (kIsWeb) {
+      _auth.setPersistence(Persistence.LOCAL);
+    }
+  }
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
   User? get currentUser => _auth.currentUser;
@@ -23,17 +33,8 @@ class AuthService {
     if (!kIsWeb) return null;
     try {
       final result = await _auth.getRedirectResult();
-      // ignore: avoid_print
-      print(
-        'resolvePendingRedirect: user=${result.user?.uid} '
-        'email=${result.user?.email} providerId=${result.credential?.providerId}',
-      );
       return result.user == null ? null : result;
-    } catch (e, st) {
-      // ignore: avoid_print
-      print('resolvePendingRedirect FAILED: $e');
-      // ignore: avoid_print
-      print(st);
+    } catch (_) {
       return null;
     }
   }

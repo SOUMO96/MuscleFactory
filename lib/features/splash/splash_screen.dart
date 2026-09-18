@@ -30,9 +30,17 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _bootstrap() async {
     final minSplashTime = Future<void>.delayed(const Duration(milliseconds: 1800));
-    final redirectResolved = AuthService.instance.resolvePendingRedirect();
 
-    await Future.wait([minSplashTime, redirectResolved]);
+    // Resolve any pending OAuth redirect first, then wait for Firebase's
+    // first auth-state event. This covers both cases: a user returning
+    // from Google sign-in, and a returning user whose previous session
+    // was simply restored from local persistence (auto login).
+    final authReady = () async {
+      await AuthService.instance.resolvePendingRedirect();
+      await AuthService.instance.authStateChanges.first;
+    }();
+
+    await Future.wait([minSplashTime, authReady]);
 
     if (!mounted) return;
     final loggedIn = AuthService.instance.currentUser != null;
