@@ -48,69 +48,86 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _bootstrap() async {
-    final urlError = _authErrorFromUrl();
-    final minSplashTime = Future<void>.delayed(const Duration(milliseconds: 1800));
+    // Everything in here is wrapped in try/catch with a guaranteed
+    // fallback navigation: whatever goes wrong (a stream error, an RLS
+    // hiccup on the profile read, anything), the user must never be left
+    // stuck on this screen forever with no way forward.
+    try {
+      final urlError = _authErrorFromUrl();
+      final minSplashTime = Future<void>.delayed(const Duration(milliseconds: 1800));
 
-    // Watch every auth event for the whole splash duration, not just the
-    // first one: when arriving from a password-recovery email link,
-    // Supabase's web SDK typically fires a generic session event first
-    // and only then a distinct passwordRecovery event once it finishes
-    // parsing the recovery token from the URL. Stopping at the first
-    // event missed this.
-    var sawPasswordRecovery = false;
-    final subscription = AuthService.instance.authStateEvents.listen((state) {
-      if (state.event == AuthChangeEvent.passwordRecovery) {
-        sawPasswordRecovery = true;
+      // Watch every auth event for the whole splash duration, not just
+      // the first one: when arriving from a password-recovery email
+      // link, Supabase's web SDK typically fires a generic session event
+      // first and only then a distinct passwordRecovery event once it
+      // finishes parsing the recovery token from the URL.
+      var sawPasswordRecovery = false;
+      final subscription = AuthService.instance.authStateEvents.listen(
+        (state) {
+          if (state.event == AuthChangeEvent.passwordRecovery) {
+            sawPasswordRecovery = true;
+          }
+        },
+        onError: (_) {},
+      );
+
+      final authReady = AuthService.instance.currentUser != null
+          ? Future<void>.value()
+          : AuthService.instance.authStateChanges.first
+              .then((_) {})
+              .timeout(const Duration(seconds: 6), onTimeout: () {})
+              .catchError((_) {});
+
+      await Future.wait([minSplashTime, authReady]);
+      await subscription.cancel();
+
+      if (!mounted) return;
+
+      if (urlError != null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => LoginScreen(initialErrorMessage: urlError)),
+        );
+        return;
       }
-    });
 
-    // Still guarded with a timeout so a browser context that never
-    // settles (e.g. storage-restricted private browsing) can't strand
-    // the user on this screen forever.
-    final authReady = AuthService.instance.currentUser != null
-        ? Future<void>.value()
-        : AuthService.instance.authStateChanges.first.timeout(
-            const Duration(seconds: 6),
-            onTimeout: () => null,
-          );
+      // A "forgot password" email link signs the user in (it proves
+      // email ownership) but they still don't know a working password --
+      // show the set-new-password screen instead of just letting them
+      // into the app.
+      if (sawPasswordRecovery) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const ResetPasswordScreen()),
+        );
+        return;
+      }
 
-    await Future.wait([minSplashTime, authReady]);
-    await subscription.cancel();
+      final user = AuthService.instance.currentUser;
+      if (user == null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+        );
+        return;
+      }
 
-    if (!mounted) return;
-
-    if (urlError != null) {
+      var surveyDone = false;
+      try {
+        surveyDone = await UserRepository.instance.ensureProfile(user.id);
+      } catch (_) {
+        surveyDone = false;
+      }
+      if (!mounted) return;
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => LoginScreen(initialErrorMessage: urlError)),
+        MaterialPageRoute(
+          builder: (_) => surveyDone ? const MainShell() : const SurveyScreen(),
+        ),
       );
-      return;
-    }
-
-    // A "forgot password" email link signs the user in (it proves email
-    // ownership) but they still don't know a working password -- show the
-    // set-new-password screen instead of just letting them into the app.
-    if (sawPasswordRecovery) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const ResetPasswordScreen()),
-      );
-      return;
-    }
-
-    final user = AuthService.instance.currentUser;
-    if (user == null) {
+    } catch (e, st) {
+      debugPrint('SplashScreen bootstrap failed: $e\n$st');
+      if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const OnboardingScreen()),
       );
-      return;
     }
-
-    final surveyDone = await UserRepository.instance.ensureProfile(user.id);
-    if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (_) => surveyDone ? const MainShell() : const SurveyScreen(),
-      ),
-    );
   }
 
   @override
