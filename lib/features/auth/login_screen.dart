@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../core/navigation/main_shell.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/services/user_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/primary_button.dart';
+import '../survey/survey_screen.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -27,10 +29,17 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _goToApp() {
+  Future<void> _goToApp() async {
+    final user = AuthService.instance.currentUser;
+    // Null on web right after signInWithGoogle(), since that call navigates
+    // the whole page away before returning here -- SplashScreen handles
+    // routing for that case once the redirect comes back.
+    if (user == null) return;
+
+    final surveyDone = await UserRepository.instance.ensureProfile(user);
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const MainShell()),
+      MaterialPageRoute(builder: (_) => surveyDone ? const MainShell() : const SurveyScreen()),
       (route) => false,
     );
   }
@@ -52,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _loading = true);
     try {
       await AuthService.instance.signInWithEmail(email: email, password: password);
-      _goToApp();
+      await _goToApp();
     } catch (e) {
       _showError(AuthService.instance.messageForError(e));
     } finally {
@@ -64,7 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _loading = true);
     try {
       await AuthService.instance.signInWithGoogle();
-      _goToApp();
+      await _goToApp();
     } catch (e) {
       _showError(AuthService.instance.messageForError(e));
     } finally {

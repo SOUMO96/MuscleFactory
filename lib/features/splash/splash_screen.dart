@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../core/navigation/main_shell.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/services/user_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../onboarding/onboarding_screen.dart';
+import '../survey/survey_screen.dart';
 
 /// App boot screen: brand mark, tagline, then routes based on auth state.
 ///
@@ -43,10 +45,19 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future.wait([minSplashTime, authReady]);
 
     if (!mounted) return;
-    final loggedIn = AuthService.instance.currentUser != null;
+    final user = AuthService.instance.currentUser;
+    if (user == null) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+      );
+      return;
+    }
+
+    final surveyDone = await UserRepository.instance.ensureProfile(user);
+    if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => loggedIn ? const MainShell() : const OnboardingScreen(),
+        builder: (_) => surveyDone ? const MainShell() : const SurveyScreen(),
       ),
     );
   }

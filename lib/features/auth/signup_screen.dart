@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../core/navigation/main_shell.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/user_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/primary_button.dart';
 import '../../shared/models/app_user.dart';
+import '../survey/survey_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -74,7 +74,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const MainShell()),
+        MaterialPageRoute(builder: (_) => const SurveyScreen()),
         (route) => false,
       );
     } catch (e) {

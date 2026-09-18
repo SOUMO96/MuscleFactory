@@ -1,5 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+enum FitnessGoal { gainWeight, loseWeight, stayFit }
+
+extension FitnessGoalLabel on FitnessGoal {
+  String get label => switch (this) {
+        FitnessGoal.gainWeight => 'Gain Weight',
+        FitnessGoal.loseWeight => 'Lose Weight',
+        FitnessGoal.stayFit => 'Stay Fit',
+      };
+
+  String get storageValue => name;
+
+  static FitnessGoal? fromStorage(String? value) {
+    for (final goal in FitnessGoal.values) {
+      if (goal.storageValue == value) return goal;
+    }
+    return null;
+  }
+}
+
 /// A user's profile document stored in Firestore at `users/{uid}`.
 class AppUser {
   const AppUser({
@@ -8,6 +27,11 @@ class AppUser {
     required this.displayName,
     this.photoUrl,
     required this.createdAt,
+    this.age,
+    this.gender,
+    this.heightCm,
+    this.goal,
+    this.surveyCompleted = false,
   });
 
   final String uid;
@@ -16,12 +40,24 @@ class AppUser {
   final String? photoUrl;
   final DateTime createdAt;
 
+  /// Fields collected by the onboarding survey (null until completed).
+  final int? age;
+  final String? gender;
+  final double? heightCm;
+  final FitnessGoal? goal;
+  final bool surveyCompleted;
+
   Map<String, dynamic> toMap() => {
         'uid': uid,
         'email': email,
         'displayName': displayName,
         'photoUrl': photoUrl,
         'createdAt': Timestamp.fromDate(createdAt),
+        'age': age,
+        'gender': gender,
+        'heightCm': heightCm,
+        'goal': goal?.storageValue,
+        'surveyCompleted': surveyCompleted,
       };
 
   factory AppUser.fromMap(Map<String, dynamic> map) => AppUser(
@@ -30,5 +66,10 @@ class AppUser {
         displayName: (map['displayName'] as String?) ?? 'Athlete',
         photoUrl: map['photoUrl'] as String?,
         createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+        age: map['age'] as int?,
+        gender: map['gender'] as String?,
+        heightCm: (map['heightCm'] as num?)?.toDouble(),
+        goal: FitnessGoalLabel.fromStorage(map['goal'] as String?),
+        surveyCompleted: map['surveyCompleted'] as bool? ?? false,
       );
 }

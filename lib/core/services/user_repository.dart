@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../shared/models/app_user.dart';
 
@@ -26,5 +27,44 @@ class UserRepository {
       final data = doc.data();
       return data == null ? null : AppUser.fromMap(data);
     });
+  }
+
+  /// Ensures a Firestore profile document exists for [user] (creating a
+  /// bare-bones one from their Firebase Auth info if this is their first
+  /// time), and reports whether they've already completed the onboarding
+  /// survey. Call this right after any successful sign-in/sign-up to
+  /// decide whether to route to the survey or straight into the app.
+  Future<bool> ensureProfile(User user) async {
+    final existing = await getUserProfile(user.uid);
+    if (existing != null) return existing.surveyCompleted;
+
+    await createUserProfile(
+      AppUser(
+        uid: user.uid,
+        email: user.email ?? '',
+        displayName: (user.displayName?.trim().isNotEmpty ?? false) ? user.displayName! : 'Athlete',
+        photoUrl: user.photoURL,
+        createdAt: DateTime.now(),
+      ),
+    );
+    return false;
+  }
+
+  Future<void> saveSurveyResults({
+    required String uid,
+    required String name,
+    required int age,
+    required String gender,
+    required double heightCm,
+    required FitnessGoal goal,
+  }) {
+    return _users.doc(uid).set({
+      'displayName': name,
+      'age': age,
+      'gender': gender,
+      'heightCm': heightCm,
+      'goal': goal.storageValue,
+      'surveyCompleted': true,
+    }, SetOptions(merge: true));
   }
 }
