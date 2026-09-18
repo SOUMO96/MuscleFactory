@@ -239,16 +239,18 @@ otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
 otp_expiry = 3600
 
-# Custom SMTP via Resend -- removes the restrictive shared-sender rate
+# Custom SMTP via Brevo -- removes the restrictive shared-sender rate
 # limit and unlocks custom email template content (both blocked on the
-# default free-tier sender).
+# default free-tier sender). Switched from Resend because Resend's free
+# tier only delivers to the account owner's own address; Brevo's free
+# tier delivers to any recipient.
 [auth.email.smtp]
 enabled = true
-host = "smtp.resend.com"
+host = "smtp-relay.brevo.com"
 port = 587
-user = "resend"
-pass = "env(RESEND_SMTP_PASS)"
-admin_email = "onboarding@resend.dev"
+user = "b9f9f2001@smtp-brevo.com"
+pass = "env(BREVO_SMTP_PASS)"
+admin_email = "nobody98837@gmail.com"
 sender_name = "Muscle Factory"
 
 [auth.email.template.confirmation]
