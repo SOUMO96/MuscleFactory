@@ -10,10 +10,12 @@ import '../../shared/models/app_user.dart';
 
 enum _HeightUnit { cm, ft }
 
+const _pageCount = 5;
+
 /// One-time onboarding survey shown right after a user's first successful
-/// sign-up/sign-in (see UserRepository.ensureProfile). Collects the basics
-/// needed to personalize the app, then writes them to the user's Firestore
-/// profile and marks the survey complete.
+/// sign-up/sign-in (see UserRepository.ensureProfile). One question per
+/// page: name, age, gender, height, goal -- then writes it all to the
+/// user's Firestore profile and marks the survey complete.
 class SurveyScreen extends StatefulWidget {
   const SurveyScreen({super.key});
 
@@ -22,6 +24,9 @@ class SurveyScreen extends StatefulWidget {
 }
 
 class _SurveyScreenState extends State<SurveyScreen> {
+  final _pageController = PageController();
+  int _pageIndex = 0;
+
   late final TextEditingController _nameController;
 
   int _age = 25;
@@ -44,6 +49,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -58,16 +64,29 @@ class _SurveyScreenState extends State<SurveyScreen> {
     );
   }
 
-  Future<void> _submit() async {
-    final name = _nameController.text.trim();
-    if (name.isEmpty) {
+  void _goToPage(int index) {
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOut,
+    );
+  }
+
+  void _next() {
+    if (_pageIndex == 0 && _nameController.text.trim().isEmpty) {
       _showError('Enter your name.');
       return;
     }
-    if (_gender == null) {
+    if (_pageIndex == 2 && _gender == null) {
       _showError('Select your gender.');
       return;
     }
+    _goToPage(_pageIndex + 1);
+  }
+
+  void _back() => _goToPage(_pageIndex - 1);
+
+  Future<void> _submit() async {
     if (_goal == null) {
       _showError('Select your goal.');
       return;
@@ -83,7 +102,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
     try {
       await UserRepository.instance.saveSurveyResults(
         uid: user.uid,
-        name: name,
+        name: _nameController.text.trim(),
         age: _age,
         gender: _gender!,
         heightCm: _heightInCm,
@@ -103,153 +122,249 @@ class _SurveyScreenState extends State<SurveyScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isLast = _pageIndex == _pageCount - 1;
+
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Tell Us About You', style: AppTextStyles.h1),
-              const SizedBox(height: 8),
-              Text(
-                'This helps us personalize your workouts and goals.',
-                style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 32),
-              Text('NAME', style: AppTextStyles.caption),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  hintText: 'Your name',
-                  prefixIcon: Icon(Icons.person_outline_rounded, color: AppColors.textMuted),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text('AGE', style: AppTextStyles.caption),
-              const SizedBox(height: 8),
-              _Stepper(
-                value: _age,
-                unit: 'years',
-                min: 13,
-                max: 99,
-                onChanged: (v) => setState(() => _age = v),
-              ),
-              const SizedBox(height: 24),
-              Text('GENDER', style: AppTextStyles.caption),
-              const SizedBox(height: 10),
-              Row(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 8, 20, 0),
+              child: Row(
                 children: [
+                  SizedBox(
+                    width: 44,
+                    child: _pageIndex > 0
+                        ? IconButton(
+                            icon: const Icon(Icons.arrow_back_rounded),
+                            onPressed: _back,
+                          )
+                        : null,
+                  ),
                   Expanded(
-                    child: _ChoiceChip(
-                      label: 'Male',
-                      selected: _gender == 'Male',
-                      onTap: () => setState(() => _gender = 'Male'),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(_pageCount, (i) {
+                        final active = i == _pageIndex;
+                        return AnimatedContainer(
+                          duration: const Duration(milliseconds: 220),
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          width: active ? 22 : 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: active ? AppColors.primary : AppColors.divider,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        );
+                      }),
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _ChoiceChip(
-                      label: 'Female',
-                      selected: _gender == 'Female',
-                      onTap: () => setState(() => _gender = 'Female'),
+                  const SizedBox(width: 44),
+                ],
+              ),
+            ),
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                physics: const NeverScrollableScrollPhysics(),
+                onPageChanged: (i) => setState(() => _pageIndex = i),
+                children: [
+                  _QuestionPage(
+                    icon: Icons.badge_outlined,
+                    title: "What's your name?",
+                    subtitle: "Let's personalize your experience.",
+                    child: TextField(
+                      controller: _nameController,
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.h2,
+                      decoration: const InputDecoration(hintText: 'Your name'),
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _ChoiceChip(
-                      label: 'Other',
-                      selected: _gender == 'Other',
-                      onTap: () => setState(() => _gender = 'Other'),
+                  _QuestionPage(
+                    icon: Icons.cake_outlined,
+                    title: 'How old are you?',
+                    subtitle: 'This helps us tailor your plan.',
+                    child: _BigStepper(
+                      value: _age,
+                      unit: 'years',
+                      min: 13,
+                      max: 99,
+                      onChanged: (v) => setState(() => _age = v),
+                    ),
+                  ),
+                  _QuestionPage(
+                    icon: Icons.wc_rounded,
+                    title: "What's your gender?",
+                    subtitle: 'Select the option that fits best.',
+                    child: Column(
+                      children: [
+                        _OptionTile(
+                          label: 'Male',
+                          selected: _gender == 'Male',
+                          onTap: () => setState(() => _gender = 'Male'),
+                        ),
+                        const SizedBox(height: 12),
+                        _OptionTile(
+                          label: 'Female',
+                          selected: _gender == 'Female',
+                          onTap: () => setState(() => _gender = 'Female'),
+                        ),
+                        const SizedBox(height: 12),
+                        _OptionTile(
+                          label: 'Other',
+                          selected: _gender == 'Other',
+                          onTap: () => setState(() => _gender = 'Other'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _QuestionPage(
+                    icon: Icons.height_rounded,
+                    title: "What's your height?",
+                    subtitle: 'Switch units any time.',
+                    child: Column(
+                      children: [
+                        _UnitToggle(unit: _unit, onChanged: (u) => setState(() => _unit = u)),
+                        const SizedBox(height: 24),
+                        if (_unit == _HeightUnit.cm)
+                          _BigStepper(
+                            value: _heightCm,
+                            unit: 'cm',
+                            min: 100,
+                            max: 230,
+                            onChanged: (v) => setState(() => _heightCm = v),
+                          )
+                        else
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _BigStepper(
+                                  value: _feet,
+                                  unit: 'ft',
+                                  min: 3,
+                                  max: 7,
+                                  onChanged: (v) => setState(() => _feet = v),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _BigStepper(
+                                  value: _inches,
+                                  unit: 'in',
+                                  min: 0,
+                                  max: 11,
+                                  onChanged: (v) => setState(() => _inches = v),
+                                ),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
+                  _QuestionPage(
+                    icon: Icons.flag_rounded,
+                    title: "What's your goal?",
+                    subtitle: "We'll tailor your plan around this.",
+                    child: Column(
+                      children: [
+                        _GoalCard(
+                          icon: Icons.trending_up_rounded,
+                          label: FitnessGoal.gainWeight.label,
+                          subtitle: 'Build muscle and increase body weight',
+                          selected: _goal == FitnessGoal.gainWeight,
+                          onTap: () => setState(() => _goal = FitnessGoal.gainWeight),
+                        ),
+                        const SizedBox(height: 10),
+                        _GoalCard(
+                          icon: Icons.trending_down_rounded,
+                          label: FitnessGoal.loseWeight.label,
+                          subtitle: 'Burn fat and reduce body weight',
+                          selected: _goal == FitnessGoal.loseWeight,
+                          onTap: () => setState(() => _goal = FitnessGoal.loseWeight),
+                        ),
+                        const SizedBox(height: 10),
+                        _GoalCard(
+                          icon: Icons.favorite_rounded,
+                          label: FitnessGoal.stayFit.label,
+                          subtitle: 'Maintain your current shape and health',
+                          selected: _goal == FitnessGoal.stayFit,
+                          onTap: () => setState(() => _goal = FitnessGoal.stayFit),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('HEIGHT', style: AppTextStyles.caption),
-                  _UnitToggle(
-                    unit: _unit,
-                    onChanged: (u) => setState(() => _unit = u),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              if (_unit == _HeightUnit.cm)
-                _Stepper(
-                  value: _heightCm,
-                  unit: 'cm',
-                  min: 100,
-                  max: 230,
-                  onChanged: (v) => setState(() => _heightCm = v),
-                )
-              else
-                Row(
-                  children: [
-                    Expanded(
-                      child: _Stepper(
-                        value: _feet,
-                        unit: 'ft',
-                        min: 3,
-                        max: 7,
-                        onChanged: (v) => setState(() => _feet = v),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _Stepper(
-                        value: _inches,
-                        unit: 'in',
-                        min: 0,
-                        max: 11,
-                        onChanged: (v) => setState(() => _inches = v),
-                      ),
-                    ),
-                  ],
-                ),
-              const SizedBox(height: 24),
-              Text('YOUR GOAL', style: AppTextStyles.caption),
-              const SizedBox(height: 10),
-              _GoalCard(
-                icon: Icons.trending_up_rounded,
-                label: FitnessGoal.gainWeight.label,
-                subtitle: 'Build muscle and increase body weight',
-                selected: _goal == FitnessGoal.gainWeight,
-                onTap: () => setState(() => _goal = FitnessGoal.gainWeight),
-              ),
-              const SizedBox(height: 10),
-              _GoalCard(
-                icon: Icons.trending_down_rounded,
-                label: FitnessGoal.loseWeight.label,
-                subtitle: 'Burn fat and reduce body weight',
-                selected: _goal == FitnessGoal.loseWeight,
-                onTap: () => setState(() => _goal = FitnessGoal.loseWeight),
-              ),
-              const SizedBox(height: 10),
-              _GoalCard(
-                icon: Icons.favorite_rounded,
-                label: FitnessGoal.stayFit.label,
-                subtitle: 'Maintain your current shape and health',
-                selected: _goal == FitnessGoal.stayFit,
-                onTap: () => setState(() => _goal = FitnessGoal.stayFit),
-              ),
-              const SizedBox(height: 32),
-              _loading
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+              child: _loading
                   ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
-                  : PrimaryButton(label: 'Finish Setup', icon: Icons.arrow_forward_rounded, onPressed: _submit),
-            ],
-          ),
+                  : PrimaryButton(
+                      label: isLast ? 'Finish Setup' : 'Continue',
+                      icon: isLast ? Icons.check_rounded : Icons.arrow_forward_rounded,
+                      onPressed: isLast ? _submit : _next,
+                    ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _Stepper extends StatelessWidget {
-  const _Stepper({
+class _QuestionPage extends StatelessWidget {
+  const _QuestionPage({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.child,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: AppColors.primaryGradient),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 24, offset: const Offset(0, 10)),
+                ],
+              ),
+              child: Icon(icon, color: AppColors.background, size: 32),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(title, textAlign: TextAlign.center, style: AppTextStyles.h1.copyWith(fontSize: 24)),
+          const SizedBox(height: 8),
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 36),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _BigStepper extends StatelessWidget {
+  const _BigStepper({
     required this.value,
     required this.unit,
     required this.min,
@@ -266,10 +381,10 @@ class _Stepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.divider),
       ),
       child: Row(
@@ -278,8 +393,8 @@ class _Stepper extends StatelessWidget {
           _stepButton(Icons.remove_rounded, value > min ? () => onChanged(value - 1) : null),
           Column(
             children: [
-              Text('$value', style: AppTextStyles.h1.copyWith(fontSize: 22)),
-              Text(unit, style: AppTextStyles.bodySmall),
+              Text('$value', style: AppTextStyles.display.copyWith(fontSize: 40)),
+              Text(unit, style: AppTextStyles.bodyMedium),
             ],
           ),
           _stepButton(Icons.add_rounded, value < max ? () => onChanged(value + 1) : null),
@@ -292,23 +407,23 @@ class _Stepper extends StatelessWidget {
     final enabled = onTap != null;
     return Material(
       color: enabled ? AppColors.primary.withValues(alpha: 0.15) : AppColors.surfaceVariant,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(14),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         onTap: onTap,
         child: Container(
-          width: 44,
-          height: 44,
+          width: 52,
+          height: 52,
           alignment: Alignment.center,
-          child: Icon(icon, color: enabled ? AppColors.primary : AppColors.textMuted, size: 22),
+          child: Icon(icon, color: enabled ? AppColors.primary : AppColors.textMuted, size: 24),
         ),
       ),
     );
   }
 }
 
-class _ChoiceChip extends StatelessWidget {
-  const _ChoiceChip({required this.label, required this.selected, required this.onTap});
+class _OptionTile extends StatelessWidget {
+  const _OptionTile({required this.label, required this.selected, required this.onTap});
   final String label;
   final bool selected;
   final VoidCallback onTap;
@@ -319,19 +434,17 @@ class _ChoiceChip extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 18),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: selected ? AppColors.primary : AppColors.card,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: selected ? AppColors.primary : AppColors.divider),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: selected ? AppColors.primary : AppColors.divider, width: selected ? 1.5 : 1),
         ),
         child: Text(
           label,
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: selected ? AppColors.background : AppColors.textPrimary,
-            fontWeight: FontWeight.w700,
-          ),
+          style: AppTextStyles.h3.copyWith(color: selected ? AppColors.background : AppColors.textPrimary),
         ),
       ),
     );
@@ -346,36 +459,36 @@ class _UnitToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(3),
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.divider),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _segment('cm', _HeightUnit.cm),
-          _segment('ft', _HeightUnit.ft),
+          _segment('Centimeters', 'cm', _HeightUnit.cm),
+          _segment('Feet & Inches', 'ft', _HeightUnit.ft),
         ],
       ),
     );
   }
 
-  Widget _segment(String label, _HeightUnit value) {
+  Widget _segment(String tooltip, String label, _HeightUnit value) {
     final selected = unit == value;
     return GestureDetector(
       onTap: () => onChanged(value),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
         decoration: BoxDecoration(
           color: selected ? AppColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(9),
         ),
         child: Text(
           label,
-          style: AppTextStyles.bodySmall.copyWith(
+          style: AppTextStyles.bodyMedium.copyWith(
             color: selected ? AppColors.background : AppColors.textSecondary,
             fontWeight: FontWeight.w700,
           ),
