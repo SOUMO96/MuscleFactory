@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -33,23 +35,38 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _bootstrap() async {
     final minSplashTime = Future<void>.delayed(const Duration(milliseconds: 1800));
 
-    // Guarded with a timeout: some browser contexts (private/incognito
-    // browsing with storage restrictions) can leave auth initialization
-    // hanging indefinitely. Better to fall through to the logged-out flow
-    // than get the user stuck on this screen forever.
-    AuthChangeEvent? lastEvent;
-    final authReady = AuthService.instance.authStateEvents.first.then((state) {
-      lastEvent = state.event;
-    }).timeout(const Duration(seconds: 6), onTimeout: () {});
+    // Watch every auth event for the whole splash duration, not just the
+    // first one: when arriving from a password-recovery email link,
+    // Supabase's web SDK typically fires a generic session event first
+    // and only then a distinct passwordRecovery event once it finishes
+    // parsing the recovery token from the URL. Stopping at the first
+    // event missed this.
+    var sawPasswordRecovery = false;
+    final subscription = AuthService.instance.authStateEvents.listen((state) {
+      if (state.event == AuthChangeEvent.passwordRecovery) {
+        sawPasswordRecovery = true;
+      }
+    });
+
+    // Still guarded with a timeout so a browser context that never
+    // settles (e.g. storage-restricted private browsing) can't strand
+    // the user on this screen forever.
+    final authReady = AuthService.instance.currentUser != null
+        ? Future<void>.value()
+        : AuthService.instance.authStateChanges.first.timeout(
+            const Duration(seconds: 6),
+            onTimeout: () => null,
+          );
 
     await Future.wait([minSplashTime, authReady]);
+    await subscription.cancel();
 
     if (!mounted) return;
 
     // A "forgot password" email link signs the user in (it proves email
     // ownership) but they still don't know a working password -- show the
     // set-new-password screen instead of just letting them into the app.
-    if (lastEvent == AuthChangeEvent.passwordRecovery) {
+    if (sawPasswordRecovery) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const ResetPasswordScreen()),
       );
