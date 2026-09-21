@@ -86,6 +86,23 @@ class AuthService {
     return _auth.resend(type: OtpType.signup, email: email);
   }
 
+  /// Emails a fresh one-time code for the login step-up check -- called
+  /// right after a password has already been validated, so a correct
+  /// password alone is never enough to reach the app (see LoginScreen /
+  /// VerifyLoginScreen). `shouldCreateUser: false` so this can't be used
+  /// to sign up a new account by itself.
+  Future<void> sendLoginCode(String email) {
+    return _auth.signInWithOtp(email: email, shouldCreateUser: false);
+  }
+
+  /// Confirms the login one-time code and establishes the real session.
+  Future<AuthResponse> verifyLoginCode({
+    required String email,
+    required String code,
+  }) {
+    return _auth.verifyOTP(email: email, token: code, type: OtpType.email);
+  }
+
   /// Turns a Supabase error into copy that's safe to show a user.
   String messageForError(Object error) {
     if (error is AuthException) {

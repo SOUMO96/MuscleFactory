@@ -9,6 +9,7 @@ import '../../core/widgets/primary_button.dart';
 import '../survey/survey_screen.dart';
 import 'signup_screen.dart';
 import 'verify_email_screen.dart';
+import 'verify_login_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, this.initialErrorMessage});
@@ -102,8 +103,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _loading = true);
     try {
+      // Validates the password, but a correct password alone must never
+      // reach the app: sign back out immediately and require a fresh
+      // emailed code before the session actually counts.
       await AuthService.instance.signInWithEmail(email: email, password: password);
-      await _goToApp();
+      await AuthService.instance.signOut();
+      await AuthService.instance.sendLoginCode(email);
+      if (!mounted) return;
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => VerifyLoginScreen(email: email)),
+      );
     } catch (e) {
       if (AuthService.instance.isEmailNotConfirmed(e)) {
         if (!mounted) return;

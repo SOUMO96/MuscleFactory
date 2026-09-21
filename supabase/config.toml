@@ -257,6 +257,13 @@ sender_name = "Muscle Factory"
 subject = "Your Muscle Factory verification code"
 content_path = "./supabase/templates/confirmation.html"
 
+# Used by the login step-up check: signInWithOtp() sends this email
+# (type "magiclink" server-side) even though the app only ever reads the
+# plain {{ .Token }} code out of it, never the link.
+[auth.email.template.magic_link]
+subject = "Your Muscle Factory login code"
+content_path = "./supabase/templates/magic_link.html"
+
 # Uncomment to customize email template
 # [auth.email.template.invite]
 # subject = "You have been invited"
