@@ -6,6 +6,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../shared/models/app_user.dart';
 import '../auth/login_screen.dart';
+import 'personal_information_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -119,10 +120,18 @@ class ProfileScreen extends StatelessWidget {
                       const SizedBox(height: 28),
                       Text('ACCOUNT', style: AppTextStyles.caption),
                       const SizedBox(height: 10),
-                      const _MenuCard(items: [
-                        _MenuItemData(icon: Icons.person_outline_rounded, label: 'Personal Information'),
-                        _MenuItemData(icon: Icons.flag_outlined, label: 'Goals & Targets'),
-                        _MenuItemData(icon: Icons.emoji_events_outlined, label: 'Achievements'),
+                      _MenuCard(items: [
+                        _MenuItemData(
+                          icon: Icons.person_outline_rounded,
+                          label: 'Personal Information',
+                          onTap: profile == null
+                              ? null
+                              : () => Navigator.of(context).push(
+                                    MaterialPageRoute(builder: (_) => PersonalInformationScreen(profile: profile)),
+                                  ),
+                        ),
+                        const _MenuItemData(icon: Icons.flag_outlined, label: 'Goals & Targets'),
+                        const _MenuItemData(icon: Icons.emoji_events_outlined, label: 'Achievements'),
                       ]),
                       const SizedBox(height: 24),
                       Text('PREFERENCES', style: AppTextStyles.caption),
@@ -313,9 +322,10 @@ class _VerticalDivider extends StatelessWidget {
 }
 
 class _MenuItemData {
-  const _MenuItemData({required this.icon, required this.label});
+  const _MenuItemData({required this.icon, required this.label, this.onTap});
   final IconData icon;
   final String label;
+  final VoidCallback? onTap;
 }
 
 class _MenuCard extends StatelessWidget {
@@ -336,7 +346,7 @@ class _MenuCard extends StatelessWidget {
           return Column(
             children: [
               InkWell(
-                onTap: () {},
+                onTap: item.onTap,
                 borderRadius: BorderRadius.circular(20),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

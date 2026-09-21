@@ -44,6 +44,25 @@ class UserRepository {
     return profile?.surveyCompleted ?? false;
   }
 
+  /// Updates the editable personal-info fields from the Profile ->
+  /// Personal Information screen, without touching goal/target fields.
+  Future<void> updatePersonalInfo({
+    required String uid,
+    required String name,
+    required int age,
+    required String gender,
+    required double heightCm,
+    required double currentWeightKg,
+  }) {
+    return _profiles.update({
+      'display_name': name,
+      'age': age,
+      'gender': gender,
+      'height_cm': heightCm,
+      'current_weight_kg': currentWeightKg,
+    }).eq('id', uid);
+  }
+
   Future<void> saveSurveyResults({
     required String uid,
     required String name,
