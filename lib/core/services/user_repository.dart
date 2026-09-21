@@ -93,23 +93,53 @@ class UserRepository {
 /// the last known value to each new listener so a screen that starts
 /// watching after the initial snapshot already arrived (e.g. navigating
 /// to a different tab) isn't left waiting for the next database change.
+///
+/// Right after a fresh login, the realtime subscription's own initial
+/// snapshot has been observed to occasionally race ahead of the new
+/// session's auth context and come back with zero rows -- which, once
+/// cached as "the" value, used to stick every screen on placeholder
+/// copy ("Athlete") for the rest of the browser session, since nothing
+/// ever re-queried after that. The profile row always exists once a
+/// user is signed in (a database trigger creates it at sign-up), so an
+/// empty result is never treated as final: it's retried with a plain
+/// REST read (the same reliable path UserRepository.getUserProfile
+/// already uses) until a real row comes back.
 class _ProfileStream {
-  _ProfileStream(SupabaseQueryBuilder profiles, String uid) {
-    profiles.stream(primaryKey: ['id']).eq('id', uid).map(
+  _ProfileStream(this._profiles, this._uid) {
+    _retrySeed();
+    _profiles.stream(primaryKey: ['id']).eq('id', _uid).map(
       (rows) => rows.isEmpty ? null : AppUser.fromMap(rows.first),
-    ).listen(
-      (value) {
-        _hasValue = true;
-        _lastValue = value;
-        _controller.add(value);
-      },
-      onError: _controller.addError,
-    );
+    ).listen(_handle, onError: _controller.addError);
   }
 
+  final SupabaseQueryBuilder _profiles;
+  final String _uid;
   final _controller = StreamController<AppUser?>.broadcast();
   AppUser? _lastValue;
   bool _hasValue = false;
+
+  void _handle(AppUser? value) {
+    if (value == null && !_hasValue) return;
+    _hasValue = true;
+    _lastValue = value;
+    _controller.add(value);
+  }
+
+  Future<void> _retrySeed() async {
+    for (var attempt = 0; attempt < 6 && !_hasValue; attempt++) {
+      if (attempt > 0) await Future.delayed(const Duration(milliseconds: 400));
+      try {
+        final row = await _profiles.select().eq('id', _uid).maybeSingle();
+        if (row != null) {
+          _handle(AppUser.fromMap(row));
+          return;
+        }
+      } catch (_) {
+        // Keep retrying -- the realtime listener may also resolve this
+        // independently in the meantime.
+      }
+    }
+  }
 
   Stream<AppUser?> get stream async* {
     if (_hasValue) yield _lastValue;
