@@ -116,7 +116,10 @@ class _Header extends StatelessWidget {
     return StreamBuilder<AppUser?>(
       stream: UserRepository.instance.watchUserProfile(user.id),
       builder: (context, snapshot) {
-        final displayName = (snapshot.data?.displayName.trim().isNotEmpty ?? false) ? snapshot.data!.displayName : 'Athlete';
+        final displayName =
+            (snapshot.data?.displayName.trim().isNotEmpty ?? false)
+                ? snapshot.data!.displayName
+                : 'Athlete';
         final firstName = displayName.split(RegExp(r'\s+')).first;
         final initials = displayName
             .trim()

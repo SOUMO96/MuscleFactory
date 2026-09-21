@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../shared/models/app_user.dart';
@@ -19,10 +21,19 @@ class UserRepository {
     return AppUser.fromMap(row);
   }
 
+  // Home, Profile and Progress all watch the same uid independently, and
+  // each StreamBuilder re-reads this every rebuild (e.g. when the browser
+  // tab regains focus). Calling `.stream()` fresh each time tore down and
+  // re-opened a new Supabase realtime subscription every rebuild, which
+  // briefly reset each screen to its no-data fallback ("Athlete") until
+  // the new subscription's first snapshot arrived -- and would stay stuck
+  // there if that round-trip didn't complete. Caching one subscription
+  // per uid and replaying its last value to every new listener fixes
+  // both the redundant resubscribing and the fallback flicker.
+  final Map<String, _ProfileStream> _profileStreams = {};
+
   Stream<AppUser?> watchUserProfile(String uid) {
-    return _profiles.stream(primaryKey: ['id']).eq('id', uid).map(
-          (rows) => rows.isEmpty ? null : AppUser.fromMap(rows.first),
-        );
+    return _profileStreams.putIfAbsent(uid, () => _ProfileStream(_profiles, uid)).stream;
   }
 
   /// Reports whether [uid] has completed the onboarding survey. The
@@ -55,5 +66,34 @@ class UserRepository {
       'goal_duration_weeks': goalDurationWeeks,
       'survey_completed': true,
     }).eq('id', uid);
+  }
+}
+
+/// One shared Supabase realtime subscription for a given profile row,
+/// broadcast to however many screens are currently watching it. Replays
+/// the last known value to each new listener so a screen that starts
+/// watching after the initial snapshot already arrived (e.g. navigating
+/// to a different tab) isn't left waiting for the next database change.
+class _ProfileStream {
+  _ProfileStream(SupabaseQueryBuilder profiles, String uid) {
+    profiles.stream(primaryKey: ['id']).eq('id', uid).map(
+      (rows) => rows.isEmpty ? null : AppUser.fromMap(rows.first),
+    ).listen(
+      (value) {
+        _hasValue = true;
+        _lastValue = value;
+        _controller.add(value);
+      },
+      onError: _controller.addError,
+    );
+  }
+
+  final _controller = StreamController<AppUser?>.broadcast();
+  AppUser? _lastValue;
+  bool _hasValue = false;
+
+  Stream<AppUser?> get stream async* {
+    if (_hasValue) yield _lastValue;
+    yield* _controller.stream;
   }
 }
