@@ -96,14 +96,17 @@ class UserRepository {
 ///
 /// Right after a fresh login, the realtime subscription's own initial
 /// snapshot has been observed to occasionally race ahead of the new
-/// session's auth context and come back with zero rows -- which, once
-/// cached as "the" value, used to stick every screen on placeholder
-/// copy ("Athlete") for the rest of the browser session, since nothing
-/// ever re-queried after that. The profile row always exists once a
-/// user is signed in (a database trigger creates it at sign-up), so an
-/// empty result is never treated as final: it's retried with a plain
-/// REST read (the same reliable path UserRepository.getUserProfile
-/// already uses) until a real row comes back.
+/// session's auth context and come back with zero rows. The profile row
+/// always exists once a user is signed in (a database trigger creates
+/// it at sign-up), so an empty/null result is never trustworthy: it is
+/// always ignored rather than cached or broadcast, from either the
+/// retry-seed below or the realtime listener. This matters even after a
+/// real value has already loaded, because the two sources race
+/// independently -- a slower, separately-racing empty result from the
+/// realtime side has been observed to land *after* the retry-seed
+/// already succeeded, which (when null was allowed through once a value
+/// existed) clobbered a correct name back to placeholder copy
+/// ("Athlete") a second or two after it briefly showed correctly.
 class _ProfileStream {
   _ProfileStream(this._profiles, this._uid) {
     _retrySeed();
@@ -119,7 +122,7 @@ class _ProfileStream {
   bool _hasValue = false;
 
   void _handle(AppUser? value) {
-    if (value == null && !_hasValue) return;
+    if (value == null) return;
     _hasValue = true;
     _lastValue = value;
     _controller.add(value);
