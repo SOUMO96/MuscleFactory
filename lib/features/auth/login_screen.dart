@@ -8,9 +8,12 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/primary_button.dart';
 import '../survey/survey_screen.dart';
 import 'signup_screen.dart';
+import 'sso_row.dart';
 import 'verify_email_screen.dart';
 import 'verify_login_screen.dart';
 
+/// Direct copy of the design handoff's "Auth Log in" screen
+/// (MF Auth.dc.html) -- a red "Welcome back" hero panel over the form.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, this.initialErrorMessage});
 
@@ -139,146 +142,89 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _goToSignup() {
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const SignupScreen()));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: AppColors.primaryGradient),
-                ),
-                child: Icon(Icons.bolt_rounded, color: AppColors.background, size: 30),
-              ),
-              const SizedBox(height: 28),
-              Text('Welcome Back', style: AppTextStyles.h1),
-              const SizedBox(height: 8),
-              Text(
-                'Log in to continue crushing your goals.',
-                style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 32),
-              Text('EMAIL', style: AppTextStyles.caption),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  hintText: 'you@example.com',
-                  prefixIcon: Icon(Icons.mail_outline_rounded, color: AppColors.textMuted),
+                width: double.infinity,
+                color: AppColors.primary,
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'MUSCLE FACTORY',
+                      style: AppTextStyles.caption.copyWith(color: AppColors.background, letterSpacing: 1.2),
+                    ),
+                    const SizedBox(height: 36),
+                    Text(
+                      'Welcome\nback',
+                      style: AppTextStyles.h1.copyWith(color: AppColors.background, fontSize: 46, height: 0.9, letterSpacing: -1),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 18),
-              Text('PASSWORD', style: AppTextStyles.caption),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _passwordController,
-                obscureText: _obscure,
-                decoration: InputDecoration(
-                  hintText: '••••••••',
-                  prefixIcon: Icon(Icons.lock_outline_rounded, color: AppColors.textMuted),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                      color: AppColors.textMuted,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('EMAIL', style: AppTextStyles.caption),
+                    const SizedBox(height: 6),
+                    TextField(controller: _emailController, keyboardType: TextInputType.emailAddress),
+                    const SizedBox(height: 16),
+                    Text('PASSWORD', style: AppTextStyles.caption),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: _obscure,
+                      decoration: InputDecoration(
+                        suffixIcon: TextButton(
+                          onPressed: () => setState(() => _obscure = !_obscure),
+                          child: Text(
+                            _obscure ? 'Show' : 'Hide',
+                            style: AppTextStyles.bodySmall.copyWith(color: AppColors.primary, fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                      ),
                     ),
-                    onPressed: () => setState(() => _obscure = !_obscure),
-                  ),
+                    const SizedBox(height: 12),
+                    GestureDetector(
+                      onTap: _loading ? null : _forgotPassword,
+                      child: Text('Forgot password?', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.primary, fontWeight: FontWeight.w800)),
+                    ),
+                    const SizedBox(height: 22),
+                    SsoRow(onGoogle: _loading ? null : _loginWithGoogle, onApple: () => _showError('Sign in with Apple is not available yet.')),
+                    const SizedBox(height: 22),
+                    _loading
+                        ? Center(child: CircularProgressIndicator(color: AppColors.primary))
+                        : PrimaryButton(label: 'Log in', icon: Icons.arrow_forward_rounded, onPressed: _login),
+                    const SizedBox(height: 14),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('New to Muscle Factory? ', style: AppTextStyles.bodyMedium),
+                        GestureDetector(
+                          onTap: _loading ? null : _goToSignup,
+                          child: Text(
+                            'Create account',
+                            style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w800, decoration: TextDecoration.underline),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: _loading ? null : _forgotPassword,
-                  child: Text('Forgot password?', style: AppTextStyles.bodySmall.copyWith(color: AppColors.primary)),
-                ),
-              ),
-              const SizedBox(height: 12),
-              _loading
-                  ? Center(child: CircularProgressIndicator(color: AppColors.primary))
-                  : PrimaryButton(label: 'Log In', onPressed: _login),
-              const SizedBox(height: 28),
-              Row(
-                children: [
-                  const Expanded(child: Divider()),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Text('or continue with', style: AppTextStyles.bodySmall),
-                  ),
-                  const Expanded(child: Divider()),
-                ],
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: _SocialButton(
-                      icon: Icons.g_mobiledata_rounded,
-                      label: 'Google',
-                      onTap: _loading ? null : _loginWithGoogle,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: _SocialButton(
-                      icon: Icons.apple_rounded,
-                      label: 'Apple',
-                      onTap: () => _showError('Sign in with Apple is not available yet.'),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 32),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text("Don't have an account? ", style: AppTextStyles.bodyMedium),
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const SignupScreen()),
-                    ),
-                    child: Text(
-                      'Sign Up',
-                      style: AppTextStyles.bodyMedium.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SocialButton extends StatelessWidget {
-  const _SocialButton({required this.icon, required this.label, required this.onTap});
-  final IconData icon;
-  final String label;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.surfaceVariant,
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          decoration: BoxDecoration(border: Border.all(color: AppColors.divider)),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 22),
-              const SizedBox(width: 8),
-              Text(label, style: AppTextStyles.bodyLarge),
             ],
           ),
         ),
