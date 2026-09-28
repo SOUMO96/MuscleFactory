@@ -5,7 +5,7 @@ import 'package:muscle_factory/core/theme/app_theme.dart';
 import 'package:muscle_factory/features/onboarding/onboarding_screen.dart';
 
 void main() {
-  testWidgets('Onboarding screen renders its first slide', (WidgetTester tester) async {
+  testWidgets('Onboarding screen renders the welcome poster', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.darkTheme,
@@ -13,8 +13,8 @@ void main() {
       ),
     );
 
-    expect(find.text('Personalized\nWorkout Plans'), findsOneWidget);
-    expect(find.text('Next'), findsOneWidget);
-    expect(find.text('Get Started'), findsNothing);
+    expect(find.text('MUSCLE\nFACTORY'), findsOneWidget);
+    expect(find.text('Continue with Google'), findsOneWidget);
+    expect(find.text('Sign up with email'), findsOneWidget);
   });
 }

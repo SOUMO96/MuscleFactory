@@ -1,46 +1,15 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
+import '../../core/services/auth_service.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_text_styles.dart';
-import '../../core/widgets/primary_button.dart';
 import '../auth/login_screen.dart';
+import '../auth/signup_screen.dart';
 
-class _OnboardPage {
-  const _OnboardPage({required this.icon, required this.title, required this.subtitle, required this.gradient, required this.iconColor});
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final List<Color> gradient;
-  final Color iconColor;
-}
-
-// A getter, not a const list: the gradients/colors read the current
-// AppColors values, which change at runtime when the theme switches (see
-// AppColors.apply).
-List<_OnboardPage> get _pages => [
-      _OnboardPage(
-        icon: Icons.fitness_center_rounded,
-        title: 'Personalized\nWorkout Plans',
-        subtitle: 'Follow programs tailored to your goals — strength, cardio, or flexibility.',
-        gradient: AppColors.primaryGradient,
-        iconColor: AppColors.background,
-      ),
-      _OnboardPage(
-        icon: Icons.show_chart_rounded,
-        title: 'Track Every\nRep & Result',
-        subtitle: 'Log workouts and watch your stats, streaks and PRs climb over time.',
-        gradient: AppColors.orangeGradient,
-        iconColor: AppColors.background,
-      ),
-      _OnboardPage(
-        icon: Icons.emoji_events_rounded,
-        title: 'Stay Motivated,\nHit Your Goals',
-        subtitle: 'Earn achievements and build streaks that keep you coming back.',
-        gradient: AppColors.heroGradient,
-        iconColor: AppColors.primary,
-      ),
-    ];
-
+/// App entry screen -- a direct copy of the design handoff's "1c Welcome"
+/// poster screen (Muscle Factory.dc.html): a black hero-photo panel over a
+/// red wordmark panel with SSO / email sign-up actions and a log-in link.
+/// These colors are fixed (matching the mock, which doesn't use the
+/// light/dark theme tokens for this screen) rather than theme-adaptive.
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -49,108 +18,162 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  final _controller = PageController();
-  int _page = 0;
+  static const _ink = Color(0xFF0D0C0C);
+  static const _accent = Color(0xFFEC3013);
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  bool _loading = false;
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: AppColors.error),
+    );
   }
 
-  void _finish() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-    );
+  Future<void> _continueWithGoogle() async {
+    setState(() => _loading = true);
+    try {
+      await AuthService.instance.signInWithGoogle();
+      // On web this navigates the page away immediately; SplashScreen
+      // picks the signed-in user back up once the redirect returns.
+    } catch (e) {
+      _showError(AuthService.instance.messageForError(e));
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  void _signUpWithEmail() {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SignupScreen()));
+  }
+
+  void _logIn() {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => const LoginScreen()));
   }
 
   @override
   Widget build(BuildContext context) {
-    final isLast = _page == _pages.length - 1;
-
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Align(
+      backgroundColor: _ink,
+      body: Column(
+        children: [
+          // Hero photo panel. The mock itself uses a plain placeholder
+          // here too ("hero photo · lifter · b/w") since no real photo
+          // asset exists -- kept honest rather than faking a stock image.
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              color: _ink,
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
               alignment: Alignment.topRight,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(0, 8, 20, 0),
-                child: TextButton(
-                  onPressed: _finish,
-                  child: Text('Skip', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary)),
+              child: Text(
+                'hero photo · lifter · b/w',
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white.withValues(alpha: 0.5),
                 ),
               ),
             ),
-            Expanded(
-              child: PageView.builder(
-                controller: _controller,
-                itemCount: _pages.length,
-                onPageChanged: (i) => setState(() => _page = i),
-                itemBuilder: (context, index) {
-                  final page = _pages[index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32),
+          ),
+          // Red wordmark panel.
+          Container(
+            width: double.infinity,
+            color: _accent,
+            padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+            child: SafeArea(
+              top: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Transform.translate(
+                    offset: const Offset(0, -50),
+                    child: const Text(
+                      'MUSCLE\nFACTORY',
+                      style: TextStyle(
+                        fontFamily: 'Archivo',
+                        fontSize: 56,
+                        fontWeight: FontWeight.w800,
+                        height: 0.86,
+                        letterSpacing: -2,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  Transform.translate(
+                    offset: const Offset(0, -36),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          width: 160,
-                          height: 160,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(colors: page.gradient, begin: Alignment.topLeft, end: Alignment.bottomRight),
-                            boxShadow: [
-                              BoxShadow(color: page.gradient.first.withValues(alpha: 0.35), blurRadius: 36, offset: const Offset(0, 16)),
-                            ],
-                          ),
-                          child: Icon(page.icon, size: 68, color: page.iconColor),
+                        const Text(
+                          'Train anywhere. Log every set. See it add up.',
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
                         ),
-                        const SizedBox(height: 48),
-                        Text(page.title, textAlign: TextAlign.center, style: AppTextStyles.h1.copyWith(fontSize: 26)),
+                        const SizedBox(height: 20),
+                        _PosterButton(
+                          label: 'Continue with Google',
+                          filled: true,
+                          onTap: _loading ? null : _continueWithGoogle,
+                        ),
+                        const SizedBox(height: 8),
+                        _PosterButton(
+                          label: 'Sign up with email',
+                          filled: false,
+                          onTap: _loading ? null : _signUpWithEmail,
+                        ),
                         const SizedBox(height: 14),
-                        Text(
-                          page.subtitle,
-                          textAlign: TextAlign.center,
-                          style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textSecondary),
+                        GestureDetector(
+                          onTap: _loading ? null : _logIn,
+                          child: RichText(
+                            text: const TextSpan(
+                              style: TextStyle(fontSize: 13, color: Colors.white, fontFamily: 'Archivo'),
+                              children: [
+                                TextSpan(text: 'Already a member? '),
+                                TextSpan(
+                                  text: 'Log in',
+                                  style: TextStyle(fontWeight: FontWeight.w800, decoration: TextDecoration.underline),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                  );
-                },
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(_pages.length, (i) {
-                final active = i == _page;
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  width: active ? 22 : 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: active ? AppColors.primary : AppColors.divider,
                   ),
-                );
-              }),
-            ),
-            const SizedBox(height: 32),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: PrimaryButton(
-                label: isLast ? 'Get Started' : 'Next',
-                icon: isLast ? Icons.arrow_forward_rounded : null,
-                onPressed: () {
-                  if (isLast) {
-                    _finish();
-                  } else {
-                    _controller.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
-                  }
-                },
+                ],
               ),
             ),
-            const SizedBox(height: 32),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PosterButton extends StatelessWidget {
+  const _PosterButton({required this.label, required this.filled, required this.onTap});
+  final String label;
+  final bool filled;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: filled ? const Color(0xFF0D0C0C) : Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          height: 52,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(border: filled ? null : Border.all(color: Colors.white, width: 2)),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
+              const Icon(Icons.arrow_forward_rounded, size: 18, color: Colors.white),
+            ],
+          ),
         ),
       ),
     );
