@@ -31,6 +31,16 @@ class _VerifyLoginScreenState extends State<VerifyLoginScreen> {
   int _resendIn = 0;
 
   @override
+  void initState() {
+    super.initState();
+    // OtpBoxes rebuilds itself on controller changes via its own
+    // AnimatedBuilder, but this screen's own build() (the "digits to
+    // go" text, the Verify button's enabled state) needs its own
+    // listener too, or it stays frozen at the initial empty state.
+    _codeController.addListener(() => setState(() {}));
+  }
+
+  @override
   void dispose() {
     _codeController.dispose();
     _timer?.cancel();
