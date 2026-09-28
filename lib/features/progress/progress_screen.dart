@@ -171,7 +171,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           ],
         ),
         const SizedBox(height: 14),
-        const Row(
+        Row(
           children: [
             Expanded(
               child: StatCard(
@@ -181,8 +181,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 accentColor: AppColors.secondary,
               ),
             ),
-            SizedBox(width: 14),
-            Expanded(
+            const SizedBox(width: 14),
+            const Expanded(
               child: StatCard(
                 icon: Icons.schedule_rounded,
                 value: '0h',

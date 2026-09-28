@@ -95,7 +95,7 @@ class _SignupScreenState extends State<SignupScreen> {
               const SizedBox(height: 8),
               TextField(
                 controller: _nameController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Alex Johnson',
                   prefixIcon: Icon(Icons.person_outline_rounded, color: AppColors.textMuted),
                 ),
@@ -106,7 +106,7 @@ class _SignupScreenState extends State<SignupScreen> {
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'you@example.com',
                   prefixIcon: Icon(Icons.mail_outline_rounded, color: AppColors.textMuted),
                 ),
@@ -119,7 +119,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 obscureText: _obscure,
                 decoration: InputDecoration(
                   hintText: 'Min. 6 characters',
-                  prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppColors.textMuted),
+                  prefixIcon: Icon(Icons.lock_outline_rounded, color: AppColors.textMuted),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
@@ -151,7 +151,7 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
               const SizedBox(height: 24),
               _loading
-                  ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                  ? Center(child: CircularProgressIndicator(color: AppColors.primary))
                   : PrimaryButton(label: 'Create Account', onPressed: _createAccount),
               const SizedBox(height: 24),
               Row(

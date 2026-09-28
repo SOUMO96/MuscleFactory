@@ -52,11 +52,11 @@ class WorkoutCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      const Icon(Icons.timer_outlined, size: 14, color: AppColors.textMuted),
+                      Icon(Icons.timer_outlined, size: 14, color: AppColors.textMuted),
                       const SizedBox(width: 4),
                       Text('${workout.durationMinutes} min', style: AppTextStyles.bodySmall),
                       const SizedBox(width: 12),
-                      const Icon(Icons.local_fire_department_outlined, size: 14, color: AppColors.textMuted),
+                      Icon(Icons.local_fire_department_outlined, size: 14, color: AppColors.textMuted),
                       const SizedBox(width: 4),
                       Text('${workout.calories} kcal', style: AppTextStyles.bodySmall),
                     ],
@@ -73,7 +73,7 @@ class WorkoutCard extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
+            Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
           ],
         ),
       ),

@@ -27,7 +27,7 @@ class HomeScreen extends StatelessWidget {
           children: [
             const _Header(),
             const SizedBox(height: 24),
-            const Row(
+            Row(
               children: [
                 Expanded(
                   child: StatCard(
@@ -37,7 +37,7 @@ class HomeScreen extends StatelessWidget {
                     accentColor: AppColors.secondary,
                   ),
                 ),
-                SizedBox(width: 14),
+                const SizedBox(width: 14),
                 Expanded(
                   child: StatCard(
                     icon: Icons.timer_rounded,
@@ -49,7 +49,7 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 14),
-            const Row(
+            Row(
               children: [
                 Expanded(
                   child: StatCard(
@@ -59,8 +59,8 @@ class HomeScreen extends StatelessWidget {
                     accentColor: AppColors.warning,
                   ),
                 ),
-                SizedBox(width: 14),
-                Expanded(
+                const SizedBox(width: 14),
+                const Expanded(
                   child: StatCard(
                     icon: Icons.flag_rounded,
                     value: '0/5',
@@ -161,8 +161,7 @@ class _HeaderContent extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                gradient:
-                    const LinearGradient(colors: AppColors.primaryGradient),
+                gradient: LinearGradient(colors: AppColors.primaryGradient),
                 borderRadius: BorderRadius.circular(14),
               ),
               alignment: Alignment.center,

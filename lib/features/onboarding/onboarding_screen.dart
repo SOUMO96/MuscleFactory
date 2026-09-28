@@ -13,26 +13,29 @@ class _OnboardPage {
   final List<Color> gradient;
 }
 
-const _pages = [
-  _OnboardPage(
-    icon: Icons.fitness_center_rounded,
-    title: 'Personalized\nWorkout Plans',
-    subtitle: 'Follow programs tailored to your goals — strength, cardio, or flexibility.',
-    gradient: AppColors.primaryGradient,
-  ),
-  _OnboardPage(
-    icon: Icons.show_chart_rounded,
-    title: 'Track Every\nRep & Result',
-    subtitle: 'Log workouts and watch your stats, streaks and PRs climb over time.',
-    gradient: AppColors.orangeGradient,
-  ),
-  _OnboardPage(
-    icon: Icons.emoji_events_rounded,
-    title: 'Stay Motivated,\nHit Your Goals',
-    subtitle: 'Earn achievements and build streaks that keep you coming back.',
-    gradient: [Color(0xFF2E7CF6), Color(0xFF6FB1FF)],
-  ),
-];
+// A getter, not a const list: the gradients read the current AppColors
+// values, which change at runtime when the theme switches (see
+// AppColors.apply).
+List<_OnboardPage> get _pages => [
+      _OnboardPage(
+        icon: Icons.fitness_center_rounded,
+        title: 'Personalized\nWorkout Plans',
+        subtitle: 'Follow programs tailored to your goals — strength, cardio, or flexibility.',
+        gradient: AppColors.primaryGradient,
+      ),
+      _OnboardPage(
+        icon: Icons.show_chart_rounded,
+        title: 'Track Every\nRep & Result',
+        subtitle: 'Log workouts and watch your stats, streaks and PRs climb over time.',
+        gradient: AppColors.orangeGradient,
+      ),
+      const _OnboardPage(
+        icon: Icons.emoji_events_rounded,
+        title: 'Stay Motivated,\nHit Your Goals',
+        subtitle: 'Earn achievements and build streaks that keep you coming back.',
+        gradient: [Color(0xFF2E7CF6), Color(0xFF6FB1FF)],
+      ),
+    ];
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});

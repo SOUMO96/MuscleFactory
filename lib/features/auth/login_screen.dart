@@ -152,10 +152,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: AppColors.primaryGradient),
+                  gradient: LinearGradient(colors: AppColors.primaryGradient),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(Icons.bolt_rounded, color: AppColors.background, size: 30),
+                child: Icon(Icons.bolt_rounded, color: AppColors.background, size: 30),
               ),
               const SizedBox(height: 28),
               Text('Welcome Back', style: AppTextStyles.h1),
@@ -170,7 +170,7 @@ class _LoginScreenState extends State<LoginScreen> {
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'you@example.com',
                   prefixIcon: Icon(Icons.mail_outline_rounded, color: AppColors.textMuted),
                 ),
@@ -183,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 obscureText: _obscure,
                 decoration: InputDecoration(
                   hintText: '••••••••',
-                  prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppColors.textMuted),
+                  prefixIcon: Icon(Icons.lock_outline_rounded, color: AppColors.textMuted),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
@@ -202,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 12),
               _loading
-                  ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                  ? Center(child: CircularProgressIndicator(color: AppColors.primary))
                   : PrimaryButton(label: 'Log In', onPressed: _login),
               const SizedBox(height: 28),
               Row(

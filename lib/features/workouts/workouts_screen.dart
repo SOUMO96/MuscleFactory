@@ -52,7 +52,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: TextField(
                 onChanged: (v) => setState(() => _query = v),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Search workouts...',
                   prefixIcon: Icon(Icons.search_rounded, color: AppColors.textMuted),
                 ),

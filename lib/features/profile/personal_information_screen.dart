@@ -160,7 +160,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
               ),
               const SizedBox(height: 32),
               _saving
-                  ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                  ? Center(child: CircularProgressIndicator(color: AppColors.primary))
                   : PrimaryButton(label: 'Save Changes', icon: Icons.check_rounded, onPressed: _save),
             ],
           ),

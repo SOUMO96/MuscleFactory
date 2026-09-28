@@ -1,48 +1,160 @@
 import 'package:flutter/material.dart';
 
-/// Central color palette for Muscle Factory.
+/// Central color palette for Muscle Factory -- the "Modernist" system: warm
+/// ink-on-paper neutrals, one red accent, no gradients.
 ///
-/// Dark, high-contrast base with a neon-lime primary accent (energy,
-/// progress, "go") and an orange secondary accent (intensity, calories).
+/// Fields are mutable (not `const`) so the whole app can switch light/dark
+/// at runtime without every call site reading through `Theme.of(context)`:
+/// call [AppColors.apply] once per rebuild (see `AppThemeController` /
+/// `main.dart`) and every existing `AppColors.xxx` reference picks up the
+/// new value on its next `build()`.
 class AppColors {
   AppColors._();
 
-  // Backgrounds
-  static const Color background = Color(0xFF0D0D0F);
-  static const Color surface = Color(0xFF141418);
-  static const Color surfaceVariant = Color(0xFF1E1E24);
-  static const Color card = Color(0xFF1B1B21);
+  static Color background = _dark.background;
+  static Color surface = _dark.surface;
+  static Color surfaceVariant = _dark.surfaceVariant;
+  static Color card = _dark.card;
 
-  // Accents
-  static const Color primary = Color(0xFFCCFF00);
-  static const Color primaryDark = Color(0xFFA8D600);
-  static const Color secondary = Color(0xFFFF5A1F);
+  static Color primary = _dark.primary;
+  static Color primaryDark = _dark.primaryDark;
+  static Color secondary = _dark.secondary;
 
-  // Status
-  static const Color success = Color(0xFF00E676);
-  static const Color warning = Color(0xFFFFC42E);
-  static const Color error = Color(0xFFFF4B4B);
+  static Color success = _dark.success;
+  static Color warning = _dark.warning;
+  static Color error = _dark.error;
 
-  // Text
-  static const Color textPrimary = Color(0xFFFFFFFF);
-  static const Color textSecondary = Color(0xFF9A9AA5);
-  static const Color textMuted = Color(0xFF6B6B75);
+  static Color textPrimary = _dark.textPrimary;
+  static Color textSecondary = _dark.textSecondary;
+  static Color textMuted = _dark.textMuted;
 
-  static const Color divider = Color(0xFF2A2A31);
+  static Color divider = _dark.divider;
 
-  // Gradients
-  static const List<Color> primaryGradient = [Color(0xFFCCFF00), Color(0xFF8FE000)];
-  static const List<Color> orangeGradient = [Color(0xFFFF5A1F), Color(0xFFFF8A3D)];
-  static const List<Color> heroGradient = [Color(0xFF23232B), Color(0xFF0D0D0F)];
+  /// Tinted accent background, for tags/badges ("Made for you").
+  static Color accentSoft = _dark.accentSoft;
+  /// Deep accent, for text-on-light-accent-background states.
+  static Color accentDeep = _dark.accentDeep;
 
-  /// Rotating accent gradients used for workout thumbnails / badges so the
-  /// library feels varied without breaking the core lime/orange identity.
-  static const List<List<Color>> workoutGradients = [
-    [Color(0xFFFF5A1F), Color(0xFFFF8A3D)], // orange
-    [Color(0xFFCCFF00), Color(0xFF8FE000)], // lime
-    [Color(0xFF2E7CF6), Color(0xFF6FB1FF)], // blue
-    [Color(0xFF9B5CFF), Color(0xFFC49BFF)], // purple
-    [Color(0xFFFF4D9D), Color(0xFFFF8AC1)], // pink
-    [Color(0xFF00D1B2), Color(0xFF5CF0D0)], // teal
-  ];
+  /// Flat "gradients" (both stops equal) so existing gradient-based widgets
+  /// keep compiling and already read as solid Modernist color blocks; Phase
+  /// 3 replaces the widgets themselves with true flat fills + border rules.
+  static List<Color> primaryGradient = _dark.primaryGradient;
+  static List<Color> orangeGradient = _dark.orangeGradient;
+  static List<Color> heroGradient = _dark.heroGradient;
+  static List<List<Color>> workoutGradients = _dark.workoutGradients;
+
+  static void apply(Brightness brightness) {
+    final set = brightness == Brightness.dark ? _dark : _light;
+    background = set.background;
+    surface = set.surface;
+    surfaceVariant = set.surfaceVariant;
+    card = set.card;
+    primary = set.primary;
+    primaryDark = set.primaryDark;
+    secondary = set.secondary;
+    success = set.success;
+    warning = set.warning;
+    error = set.error;
+    textPrimary = set.textPrimary;
+    textSecondary = set.textSecondary;
+    textMuted = set.textMuted;
+    divider = set.divider;
+    accentSoft = set.accentSoft;
+    accentDeep = set.accentDeep;
+    primaryGradient = set.primaryGradient;
+    orangeGradient = set.orangeGradient;
+    heroGradient = set.heroGradient;
+    workoutGradients = set.workoutGradients;
+  }
 }
+
+class _AppColorSet {
+  const _AppColorSet({
+    required this.background,
+    required this.surface,
+    required this.surfaceVariant,
+    required this.card,
+    required this.primary,
+    required this.primaryDark,
+    required this.secondary,
+    required this.success,
+    required this.warning,
+    required this.error,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.textMuted,
+    required this.divider,
+    required this.accentSoft,
+    required this.accentDeep,
+  });
+
+  final Color background;
+  final Color surface;
+  final Color surfaceVariant;
+  final Color card;
+  final Color primary;
+  final Color primaryDark;
+  final Color secondary;
+  final Color success;
+  final Color warning;
+  final Color error;
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color textMuted;
+  final Color divider;
+  final Color accentSoft;
+  final Color accentDeep;
+
+  List<Color> get primaryGradient => [primary, primary];
+  List<Color> get orangeGradient => [secondary, secondary];
+  List<Color> get heroGradient => [background, background];
+  List<List<Color>> get workoutGradients => [
+        [primary, primary],
+        [Color.alphaBlend(textPrimary.withValues(alpha: 0.85), primary), primary],
+        [textPrimary, textPrimary],
+        [primary, primary],
+        [Color.alphaBlend(textPrimary.withValues(alpha: 0.85), primary), primary],
+        [textPrimary, textPrimary],
+      ];
+}
+
+const _lightText = Color(0xFF201E1D);
+const _darkText = Color(0xFFF1EFEE);
+
+final _light = _AppColorSet(
+  background: const Color(0xFFF3F2F2),
+  surface: const Color(0xFFEAE9E9),
+  surfaceVariant: const Color(0xFFEAE7E7),
+  card: const Color(0xFFEAE9E9),
+  primary: const Color(0xFFEC3013),
+  primaryDark: const Color(0xFFAE1800),
+  secondary: const Color(0xFFFF563C),
+  success: const Color(0xFF1E8E3E),
+  warning: const Color(0xFFB45309),
+  error: const Color(0xFFAE1800),
+  textPrimary: _lightText,
+  textSecondary: _lightText.withValues(alpha: 0.62),
+  textMuted: _lightText.withValues(alpha: 0.50),
+  divider: _lightText.withValues(alpha: 0.40),
+  accentSoft: const Color(0xFFFFF2EF),
+  accentDeep: const Color(0xFF7C1405),
+);
+
+final _dark = _AppColorSet(
+  background: const Color(0xFF161514),
+  surface: const Color(0xFF232120),
+  surfaceVariant: const Color(0xFF2A2827),
+  card: const Color(0xFF232120),
+  primary: const Color(0xFFF0391C),
+  primaryDark: const Color(0xFFFF9783),
+  secondary: const Color(0xFFFF563C),
+  success: const Color(0xFF3FBE6B),
+  warning: const Color(0xFFE0A339),
+  error: const Color(0xFFFF9783),
+  textPrimary: _darkText,
+  textSecondary: _darkText.withValues(alpha: 0.62),
+  textMuted: _darkText.withValues(alpha: 0.50),
+  divider: _darkText.withValues(alpha: 0.26),
+  accentSoft: const Color(0xFF3A1A14),
+  accentDeep: const Color(0xFFFFC4B8),
+);

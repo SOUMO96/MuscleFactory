@@ -378,7 +378,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
               child: _loading
-                  ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                  ? Center(child: CircularProgressIndicator(color: AppColors.primary))
                   : PrimaryButton(
                       label: isLast ? 'Finish Setup' : 'Continue',
                       icon: isLast ? Icons.check_rounded : Icons.arrow_forward_rounded,
@@ -417,7 +417,7 @@ class _QuestionPage extends StatelessWidget {
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: AppColors.primaryGradient),
+                gradient: LinearGradient(colors: AppColors.primaryGradient),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 24, offset: const Offset(0, 10)),

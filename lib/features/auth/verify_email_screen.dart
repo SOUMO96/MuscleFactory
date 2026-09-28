@@ -101,10 +101,10 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: AppColors.primaryGradient),
+                  gradient: LinearGradient(colors: AppColors.primaryGradient),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(Icons.mark_email_read_outlined, color: AppColors.background, size: 28),
+                child: Icon(Icons.mark_email_read_outlined, color: AppColors.background, size: 28),
               ),
               const SizedBox(height: 28),
               Text('Check Your Email', style: AppTextStyles.h1),
@@ -129,7 +129,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
               ),
               const SizedBox(height: 12),
               _loading
-                  ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                  ? Center(child: CircularProgressIndicator(color: AppColors.primary))
                   : PrimaryButton(label: 'Verify', icon: Icons.check_rounded, onPressed: _verify),
               const SizedBox(height: 20),
               Center(

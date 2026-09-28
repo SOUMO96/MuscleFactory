@@ -100,10 +100,10 @@ class _VerifyLoginScreenState extends State<VerifyLoginScreen> {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: AppColors.primaryGradient),
+                  gradient: LinearGradient(colors: AppColors.primaryGradient),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(Icons.verified_user_outlined, color: AppColors.background, size: 28),
+                child: Icon(Icons.verified_user_outlined, color: AppColors.background, size: 28),
               ),
               const SizedBox(height: 28),
               Text('Confirm It\'s You', style: AppTextStyles.h1),
@@ -128,7 +128,7 @@ class _VerifyLoginScreenState extends State<VerifyLoginScreen> {
               ),
               const SizedBox(height: 12),
               _loading
-                  ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                  ? Center(child: CircularProgressIndicator(color: AppColors.primary))
                   : PrimaryButton(label: 'Verify & Log In', icon: Icons.check_rounded, onPressed: _verify),
               const SizedBox(height: 20),
               Center(

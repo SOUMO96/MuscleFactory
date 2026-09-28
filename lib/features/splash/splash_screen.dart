@@ -136,7 +136,7 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: AppColors.heroGradient,
             begin: Alignment.topCenter,
@@ -150,13 +150,13 @@ class _SplashScreenState extends State<SplashScreen> {
               width: 96,
               height: 96,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: AppColors.primaryGradient),
+                gradient: LinearGradient(colors: AppColors.primaryGradient),
                 borderRadius: BorderRadius.circular(28),
                 boxShadow: [
                   BoxShadow(color: AppColors.primary.withValues(alpha: 0.4), blurRadius: 30, offset: const Offset(0, 12)),
                 ],
               ),
-              child: const Icon(Icons.bolt_rounded, color: AppColors.background, size: 52),
+              child: Icon(Icons.bolt_rounded, color: AppColors.background, size: 52),
             ),
             const SizedBox(height: 24),
             Text('MUSCLE FACTORY', style: AppTextStyles.display.copyWith(letterSpacing: 2, fontSize: 28)),
@@ -166,7 +166,7 @@ class _SplashScreenState extends State<SplashScreen> {
               style: AppTextStyles.bodySmall.copyWith(letterSpacing: 3, color: AppColors.textMuted),
             ),
             const SizedBox(height: 56),
-            const SizedBox(
+            SizedBox(
               width: 32,
               height: 32,
               child: CircularProgressIndicator(

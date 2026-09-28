@@ -112,7 +112,7 @@ class WorkoutDetailScreen extends StatelessWidget {
               top: false,
               child: Container(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: AppColors.background,
                   border: Border(top: BorderSide(color: AppColors.divider)),
                 ),

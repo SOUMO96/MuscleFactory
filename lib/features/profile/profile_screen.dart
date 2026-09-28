@@ -60,7 +60,7 @@ class ProfileScreen extends StatelessWidget {
                                 Container(
                                   width: 96,
                                   height: 96,
-                                  decoration: const BoxDecoration(
+                                  decoration: BoxDecoration(
                                     gradient: LinearGradient(colors: AppColors.primaryGradient),
                                     shape: BoxShape.circle,
                                   ),
@@ -167,7 +167,7 @@ class ProfileScreen extends StatelessWidget {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(Icons.logout_rounded, color: AppColors.error, size: 20),
+                                Icon(Icons.logout_rounded, color: AppColors.error, size: 20),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Log Out',
@@ -239,7 +239,7 @@ class _FitnessProfileCard extends StatelessWidget {
                     color: AppColors.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.flag_rounded, color: AppColors.primary, size: 20),
+                  child: Icon(Icons.flag_rounded, color: AppColors.primary, size: 20),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -362,7 +362,7 @@ class _MenuCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 14),
                       Expanded(child: Text(item.label, style: AppTextStyles.bodyLarge)),
-                      const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
+                      Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
                     ],
                   ),
                 ),

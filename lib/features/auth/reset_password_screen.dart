@@ -86,10 +86,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: AppColors.primaryGradient),
+                  gradient: LinearGradient(colors: AppColors.primaryGradient),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(Icons.lock_reset_rounded, color: AppColors.background, size: 30),
+                child: Icon(Icons.lock_reset_rounded, color: AppColors.background, size: 30),
               ),
               const SizedBox(height: 28),
               Text('Set a New Password', style: AppTextStyles.h1),
@@ -106,7 +106,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 obscureText: _obscure,
                 decoration: InputDecoration(
                   hintText: 'Min. 6 characters',
-                  prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppColors.textMuted),
+                  prefixIcon: Icon(Icons.lock_outline_rounded, color: AppColors.textMuted),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
@@ -122,14 +122,14 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               TextField(
                 controller: _confirmController,
                 obscureText: _obscure,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Re-enter your new password',
                   prefixIcon: Icon(Icons.lock_outline_rounded, color: AppColors.textMuted),
                 ),
               ),
               const SizedBox(height: 24),
               _loading
-                  ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                  ? Center(child: CircularProgressIndicator(color: AppColors.primary))
                   : PrimaryButton(label: 'Save New Password', icon: Icons.check_rounded, onPressed: _submit),
             ],
           ),
