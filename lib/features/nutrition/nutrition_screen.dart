@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 
 import '../../core/services/auth_service.dart';
 import '../../core/services/nutrition_repository.dart';
+import '../../core/services/water_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/primary_button.dart';
 import '../../shared/models/nutrition_entry.dart';
+
+/// General daily water-intake guideline (2L) -- not personalized, shown
+/// as a plain target rather than fabricated per-user data.
+const _waterGoalMl = 2000;
 
 /// Real manual meal/macro logging for today -- no food database search,
 /// matching the redesign plan's explicit scope for this screen.
@@ -18,6 +23,7 @@ class NutritionScreen extends StatefulWidget {
 
 class _NutritionScreenState extends State<NutritionScreen> {
   List<NutritionEntry> _entries = [];
+  int _waterMl = 0;
   bool _loading = true;
 
   @override
@@ -30,12 +36,23 @@ class _NutritionScreenState extends State<NutritionScreen> {
     final userId = AuthService.instance.currentUser?.id;
     if (userId == null) return;
     setState(() => _loading = true);
-    final entries = await NutritionRepository.instance.entriesForDate(userId, DateTime.now());
+    final results = await Future.wait([
+      NutritionRepository.instance.entriesForDate(userId, DateTime.now()),
+      WaterRepository.instance.totalForDate(userId, DateTime.now()),
+    ]);
     if (!mounted) return;
     setState(() {
-      _entries = entries;
+      _entries = results[0] as List<NutritionEntry>;
+      _waterMl = results[1] as int;
       _loading = false;
     });
+  }
+
+  Future<void> _addWater(int amountMl) async {
+    final userId = AuthService.instance.currentUser?.id;
+    if (userId == null) return;
+    await WaterRepository.instance.addWater(userId: userId, date: DateTime.now(), amountMl: amountMl);
+    _load();
   }
 
   Future<void> _addMeal() async {
@@ -89,6 +106,44 @@ class _NutritionScreenState extends State<NutritionScreen> {
                         Container(width: 1, height: 48, color: AppColors.divider),
                         Expanded(child: _MacroCell(label: 'Fat', value: totalFat)),
                       ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Water', style: AppTextStyles.bodySmall),
+                            Text('${(_waterMl / 1000).toStringAsFixed(1)} / ${(_waterGoalMl / 1000).toStringAsFixed(1)} L', style: AppTextStyles.h3),
+                          ],
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => _addWater(250),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          decoration: BoxDecoration(border: Border.all(color: AppColors.divider)),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.water_drop_outlined, size: 16, color: AppColors.primary),
+                              const SizedBox(width: 6),
+                              Text('+250ml', style: AppTextStyles.bodySmall.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  ClipRect(
+                    child: LinearProgressIndicator(
+                      value: (_waterMl / _waterGoalMl).clamp(0, 1).toDouble(),
+                      minHeight: 6,
+                      backgroundColor: AppColors.surfaceVariant,
+                      color: AppColors.primary,
                     ),
                   ),
                   const SizedBox(height: 24),

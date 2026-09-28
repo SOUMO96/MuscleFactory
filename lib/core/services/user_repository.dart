@@ -63,6 +63,25 @@ class UserRepository {
     }).eq('id', uid);
   }
 
+  /// Updates just the current weight -- Home's "Log Weight" quick action.
+  Future<void> updateCurrentWeight({required String uid, required double weightKg}) {
+    return _profiles.update({'current_weight_kg': weightKg}).eq('id', uid);
+  }
+
+  /// Updates just the goal fields -- the "Goals & Targets" screen.
+  Future<void> updateGoal({
+    required String uid,
+    required FitnessGoal goal,
+    required double targetWeightKg,
+    required int goalDurationWeeks,
+  }) {
+    return _profiles.update({
+      'goal': goal.storageValue,
+      'target_weight_kg': targetWeightKg,
+      'goal_duration_weeks': goalDurationWeeks,
+    }).eq('id', uid);
+  }
+
   Future<void> saveSurveyResults({
     required String uid,
     required String name,
