@@ -27,47 +27,12 @@ class HomeScreen extends StatelessWidget {
           children: [
             const _Header(),
             const SizedBox(height: 24),
-            Row(
+            const StatRow(
               children: [
-                Expanded(
-                  child: StatCard(
-                    icon: Icons.local_fire_department_rounded,
-                    value: '0',
-                    label: 'Calories burned',
-                    accentColor: AppColors.secondary,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: StatCard(
-                    icon: Icons.timer_rounded,
-                    value: '0 min',
-                    label: 'Active time',
-                    accentColor: AppColors.primary,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  child: StatCard(
-                    icon: Icons.local_fire_department_outlined,
-                    value: '0 days',
-                    label: 'Current streak',
-                    accentColor: AppColors.warning,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                const Expanded(
-                  child: StatCard(
-                    icon: Icons.flag_rounded,
-                    value: '0/5',
-                    label: 'Weekly goal',
-                    accentColor: Color(0xFF2E7CF6),
-                  ),
-                ),
+                StatCell(value: '0', label: 'Calories burned'),
+                StatCell(value: '0 min', label: 'Active time'),
+                StatCell(value: '0 days', label: 'Current streak'),
+                StatCell(value: '0/5', label: 'Weekly goal'),
               ],
             ),
             const SizedBox(height: 28),
@@ -160,10 +125,7 @@ class _HeaderContent extends StatelessWidget {
             Container(
               width: 44,
               height: 44,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(colors: AppColors.primaryGradient),
-                borderRadius: BorderRadius.circular(14),
-              ),
+              color: AppColors.primary,
               alignment: Alignment.center,
               child: Text(
                 initials.isEmpty ? '?' : initials,
@@ -186,14 +148,13 @@ class _IconBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.surfaceVariant,
-      borderRadius: BorderRadius.circular(14),
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
         onTap: onTap,
         child: Container(
           width: 44,
           height: 44,
           alignment: Alignment.center,
+          decoration: BoxDecoration(border: Border.all(color: AppColors.divider)),
           child: Icon(icon, size: 22),
         ),
       ),
@@ -221,18 +182,13 @@ class _QuickActionsRow extends StatelessWidget {
               children: [
                 Material(
                   color: AppColors.card,
-                  borderRadius: BorderRadius.circular(16),
                   child: InkWell(
-                    borderRadius: BorderRadius.circular(16),
                     onTap: () {},
                     child: Container(
                       width: 64,
                       height: 64,
                       alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.divider),
-                      ),
+                      decoration: BoxDecoration(border: Border.all(color: AppColors.divider)),
                       child: Icon(a.icon, color: AppColors.primary, size: 24),
                     ),
                   ),

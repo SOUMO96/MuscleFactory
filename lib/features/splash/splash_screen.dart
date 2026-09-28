@@ -8,6 +8,8 @@ import '../../core/services/auth_service.dart';
 import '../../core/services/user_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/app_theme_controller.dart';
+import '../../shared/models/app_user.dart';
 import '../auth/login_screen.dart';
 import '../auth/reset_password_screen.dart';
 import '../onboarding/onboarding_screen.dart';
@@ -111,7 +113,15 @@ class _SplashScreenState extends State<SplashScreen> {
 
       var surveyDone = false;
       try {
-        surveyDone = await UserRepository.instance.ensureProfile(user.id);
+        final profile = await UserRepository.instance.getUserProfile(user.id);
+        surveyDone = profile?.surveyCompleted ?? false;
+        if (profile != null) {
+          AppThemeController.instance.setMode(switch (profile.themePreference) {
+            ThemePreference.light => ThemeMode.light,
+            ThemePreference.dark => ThemeMode.dark,
+            ThemePreference.system => ThemeMode.system,
+          });
+        }
       } catch (_) {
         surveyDone = false;
       }

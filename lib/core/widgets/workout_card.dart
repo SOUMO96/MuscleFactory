@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import '../../shared/models/workout.dart';
 import '../theme/app_colors.dart';
@@ -20,7 +20,6 @@ class WorkoutCard extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: AppColors.card,
-          borderRadius: BorderRadius.circular(20),
           border: Border.all(color: AppColors.divider),
         ),
         child: Row(
@@ -28,15 +27,8 @@ class WorkoutCard extends StatelessWidget {
             Container(
               width: 64,
               height: 64,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: workout.gradient,
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Icon(workout.icon, color: Colors.white, size: 28),
+              color: workout.gradient.first,
+              child: Icon(workout.icon, color: AppColors.background, size: 28),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -63,12 +55,9 @@ class WorkoutCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceVariant,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(workout.level, style: AppTextStyles.caption),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(border: Border.all(color: AppColors.divider)),
+                    child: Text(workout.level.toUpperCase(), style: AppTextStyles.caption),
                   ),
                 ],
               ),
@@ -95,57 +84,40 @@ class FeaturedWorkoutCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: workout.gradient,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(color: workout.gradient.first.withValues(alpha: 0.3), blurRadius: 24, offset: const Offset(0, 12)),
-          ],
-        ),
+        color: AppColors.primary,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.25),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    "TODAY'S WORKOUT",
-                    style: AppTextStyles.caption.copyWith(color: Colors.white),
-                  ),
+                Text(
+                  "TODAY'S WORKOUT",
+                  style: AppTextStyles.caption.copyWith(color: AppColors.background),
                 ),
-                Icon(workout.icon, color: Colors.white, size: 26),
+                Icon(workout.icon, color: AppColors.background, size: 26),
               ],
             ),
             const SizedBox(height: 16),
             Text(
               workout.name,
-              style: AppTextStyles.h1.copyWith(color: Colors.white, fontSize: 22),
+              style: AppTextStyles.h1.copyWith(color: AppColors.background, fontSize: 22),
             ),
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.timer_outlined, size: 15, color: Colors.white.withValues(alpha: 0.85)),
+                Icon(Icons.timer_outlined, size: 15, color: AppColors.background.withValues(alpha: 0.75)),
                 const SizedBox(width: 4),
                 Text(
                   '${workout.durationMinutes} min',
-                  style: AppTextStyles.bodyMedium.copyWith(color: Colors.white.withValues(alpha: 0.85)),
+                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.background.withValues(alpha: 0.75)),
                 ),
                 const SizedBox(width: 14),
-                Icon(Icons.local_fire_department_outlined, size: 15, color: Colors.white.withValues(alpha: 0.85)),
+                Icon(Icons.local_fire_department_outlined, size: 15, color: AppColors.background.withValues(alpha: 0.75)),
                 const SizedBox(width: 4),
                 Text(
                   '${workout.calories} kcal',
-                  style: AppTextStyles.bodyMedium.copyWith(color: Colors.white.withValues(alpha: 0.85)),
+                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.background.withValues(alpha: 0.75)),
                 ),
               ],
             ),
@@ -153,19 +125,16 @@ class FeaturedWorkoutCard extends StatelessWidget {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 14),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-              ),
+              color: AppColors.textPrimary,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     'Start Workout',
-                    style: AppTextStyles.button.copyWith(color: Colors.black),
+                    style: AppTextStyles.button.copyWith(color: AppColors.background),
                   ),
                   const SizedBox(width: 6),
-                  const Icon(Icons.arrow_forward_rounded, size: 18, color: Colors.black),
+                  Icon(Icons.arrow_forward_rounded, size: 18, color: AppColors.background),
                 ],
               ),
             ),
