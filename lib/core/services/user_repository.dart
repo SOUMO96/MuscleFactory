@@ -73,6 +73,7 @@ class UserRepository {
     required FitnessGoal goal,
     required double targetWeightKg,
     required int goalDurationWeeks,
+    required int trainingDaysPerWeek,
   }) {
     return _profiles.update({
       'display_name': name,
@@ -83,8 +84,27 @@ class UserRepository {
       'goal': goal.storageValue,
       'target_weight_kg': targetWeightKg,
       'goal_duration_weeks': goalDurationWeeks,
+      'training_days_per_week': trainingDaysPerWeek,
       'survey_completed': true,
     }).eq('id', uid);
+  }
+
+  /// Updates the Me tab's preferences (units, appearance, rest timer,
+  /// workout reminders).
+  Future<void> updateSettings({
+    required String uid,
+    ThemePreference? themePreference,
+    UnitPreference? unitPreference,
+    int? defaultRestSeconds,
+    bool? workoutRemindersEnabled,
+  }) {
+    final updates = <String, dynamic>{};
+    if (themePreference != null) updates['theme_preference'] = themePreference.storageValue;
+    if (unitPreference != null) updates['unit_preference'] = unitPreference.storageValue;
+    if (defaultRestSeconds != null) updates['default_rest_seconds'] = defaultRestSeconds;
+    if (workoutRemindersEnabled != null) updates['workout_reminders_enabled'] = workoutRemindersEnabled;
+    if (updates.isEmpty) return Future.value();
+    return _profiles.update(updates).eq('id', uid);
   }
 }
 

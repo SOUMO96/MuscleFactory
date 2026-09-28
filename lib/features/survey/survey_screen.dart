@@ -10,13 +10,13 @@ import '../../shared/models/app_user.dart';
 
 enum _HeightUnit { cm, ft }
 
-const _pageCount = 7;
+const _pageCount = 8;
 
 /// One-time onboarding survey shown right after a user's first successful
 /// sign-up/sign-in (see UserRepository.ensureProfile). One question per
 /// page: name, age, gender, height, current weight, goal, target weight +
-/// duration -- then writes it all to the user's Supabase profile row and
-/// marks the survey complete.
+/// duration, training days/week -- then writes it all to the user's
+/// Supabase profile row and marks the survey complete.
 class SurveyScreen extends StatefulWidget {
   const SurveyScreen({super.key});
 
@@ -43,6 +43,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
   double _currentWeightKg = 70;
   double _targetWeightKg = 70;
   int _durationWeeks = 12;
+  int _trainingDaysPerWeek = 4;
 
   @override
   void initState() {
@@ -138,6 +139,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
         goal: _goal!,
         targetWeightKg: _targetWeightKg,
         goalDurationWeeks: _durationWeeks,
+        trainingDaysPerWeek: _trainingDaysPerWeek,
       );
 
       if (!mounted) return;
@@ -370,6 +372,19 @@ class _SurveyScreenState extends State<SurveyScreen> {
                           onChanged: (v) => setState(() => _durationWeeks = v.round()),
                         ),
                       ],
+                    ),
+                  ),
+                  _QuestionPage(
+                    icon: Icons.event_repeat_rounded,
+                    title: 'Training days per week',
+                    subtitle: "How often do you want to train? You can change this later.",
+                    child: _Stepper(
+                      value: _trainingDaysPerWeek.toDouble(),
+                      unit: 'days / week',
+                      min: 1,
+                      max: 6,
+                      step: 1,
+                      onChanged: (v) => setState(() => _trainingDaysPerWeek = v.round()),
                     ),
                   ),
                 ],

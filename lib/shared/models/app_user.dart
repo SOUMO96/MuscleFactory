@@ -17,6 +17,32 @@ extension FitnessGoalLabel on FitnessGoal {
   }
 }
 
+enum ThemePreference { light, dark, system }
+
+extension ThemePreferenceX on ThemePreference {
+  String get storageValue => name;
+
+  static ThemePreference fromStorage(String? value) {
+    for (final pref in ThemePreference.values) {
+      if (pref.storageValue == value) return pref;
+    }
+    return ThemePreference.system;
+  }
+}
+
+enum UnitPreference { kg, lb }
+
+extension UnitPreferenceX on UnitPreference {
+  String get storageValue => name;
+
+  static UnitPreference fromStorage(String? value) {
+    for (final pref in UnitPreference.values) {
+      if (pref.storageValue == value) return pref;
+    }
+    return UnitPreference.kg;
+  }
+}
+
 /// A user's profile row, stored in Supabase Postgres at `public.profiles`
 /// (one row per `auth.users` row, primary key `id`).
 class AppUser {
@@ -34,6 +60,11 @@ class AppUser {
     this.targetWeightKg,
     this.goalDurationWeeks,
     this.surveyCompleted = false,
+    this.trainingDaysPerWeek,
+    this.themePreference = ThemePreference.system,
+    this.unitPreference = UnitPreference.kg,
+    this.defaultRestSeconds = 90,
+    this.workoutRemindersEnabled = false,
   });
 
   final String uid;
@@ -51,6 +82,13 @@ class AppUser {
   final double? targetWeightKg;
   final int? goalDurationWeeks;
   final bool surveyCompleted;
+  final int? trainingDaysPerWeek;
+
+  /// Settings from the Me tab.
+  final ThemePreference themePreference;
+  final UnitPreference unitPreference;
+  final int defaultRestSeconds;
+  final bool workoutRemindersEnabled;
 
   factory AppUser.fromMap(Map<String, dynamic> map) => AppUser(
         uid: map['id'] as String,
@@ -66,5 +104,10 @@ class AppUser {
         targetWeightKg: (map['target_weight_kg'] as num?)?.toDouble(),
         goalDurationWeeks: map['goal_duration_weeks'] as int?,
         surveyCompleted: map['survey_completed'] as bool? ?? false,
+        trainingDaysPerWeek: map['training_days_per_week'] as int?,
+        themePreference: ThemePreferenceX.fromStorage(map['theme_preference'] as String?),
+        unitPreference: UnitPreferenceX.fromStorage(map['unit_preference'] as String?),
+        defaultRestSeconds: map['default_rest_seconds'] as int? ?? 90,
+        workoutRemindersEnabled: map['workout_reminders_enabled'] as bool? ?? false,
       );
 }
