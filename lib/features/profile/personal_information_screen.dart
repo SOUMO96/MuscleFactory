@@ -186,7 +186,6 @@ class _GenderChip extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: selected ? AppColors.primary : AppColors.card,
-          borderRadius: BorderRadius.circular(14),
           border: Border.all(color: selected ? AppColors.primary : AppColors.divider, width: selected ? 1.5 : 1),
         ),
         child: Text(

@@ -87,7 +87,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 height: 56,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(colors: AppColors.primaryGradient),
-                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(Icons.lock_reset_rounded, color: AppColors.background, size: 30),
               ),

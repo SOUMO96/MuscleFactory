@@ -153,7 +153,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 56,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(colors: AppColors.primaryGradient),
-                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(Icons.bolt_rounded, color: AppColors.background, size: 30),
               ),
@@ -269,12 +268,11 @@ class _SocialButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.surfaceVariant,
-      borderRadius: BorderRadius.circular(14),
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
         onTap: onTap,
-        child: Padding(
+        child: Container(
           padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(border: Border.all(color: AppColors.divider)),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

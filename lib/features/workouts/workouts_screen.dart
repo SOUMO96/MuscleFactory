@@ -39,7 +39,6 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                   Text('Workouts', style: AppTextStyles.h1.copyWith(fontSize: 24)),
                   Material(
                     color: AppColors.surfaceVariant,
-                    borderRadius: BorderRadius.circular(14),
                     child: const Padding(
                       padding: EdgeInsets.all(10),
                       child: Icon(Icons.tune_rounded, size: 22),
@@ -77,7 +76,6 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: selected ? AppColors.primary : AppColors.card,
-                        borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: selected ? AppColors.primary : AppColors.divider),
                       ),
                       child: Text(

@@ -47,7 +47,6 @@ class WorkoutDetailScreen extends StatelessWidget {
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
                             color: AppColors.card,
-                            borderRadius: BorderRadius.circular(18),
                             border: Border.all(color: AppColors.divider),
                           ),
                           child: Row(
@@ -58,7 +57,6 @@ class WorkoutDetailScreen extends StatelessWidget {
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
                                   color: AppColors.surfaceVariant,
-                                  borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
                                   '${i + 1}',
@@ -184,7 +182,6 @@ class _MetaChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.25),
-        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

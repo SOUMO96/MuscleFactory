@@ -6,15 +6,16 @@ import '../../core/widgets/primary_button.dart';
 import '../auth/login_screen.dart';
 
 class _OnboardPage {
-  const _OnboardPage({required this.icon, required this.title, required this.subtitle, required this.gradient});
+  const _OnboardPage({required this.icon, required this.title, required this.subtitle, required this.gradient, required this.iconColor});
   final IconData icon;
   final String title;
   final String subtitle;
   final List<Color> gradient;
+  final Color iconColor;
 }
 
-// A getter, not a const list: the gradients read the current AppColors
-// values, which change at runtime when the theme switches (see
+// A getter, not a const list: the gradients/colors read the current
+// AppColors values, which change at runtime when the theme switches (see
 // AppColors.apply).
 List<_OnboardPage> get _pages => [
       _OnboardPage(
@@ -22,18 +23,21 @@ List<_OnboardPage> get _pages => [
         title: 'Personalized\nWorkout Plans',
         subtitle: 'Follow programs tailored to your goals — strength, cardio, or flexibility.',
         gradient: AppColors.primaryGradient,
+        iconColor: AppColors.background,
       ),
       _OnboardPage(
         icon: Icons.show_chart_rounded,
         title: 'Track Every\nRep & Result',
         subtitle: 'Log workouts and watch your stats, streaks and PRs climb over time.',
         gradient: AppColors.orangeGradient,
+        iconColor: AppColors.background,
       ),
-      const _OnboardPage(
+      _OnboardPage(
         icon: Icons.emoji_events_rounded,
         title: 'Stay Motivated,\nHit Your Goals',
         subtitle: 'Earn achievements and build streaks that keep you coming back.',
-        gradient: [Color(0xFF2E7CF6), Color(0xFF6FB1FF)],
+        gradient: AppColors.heroGradient,
+        iconColor: AppColors.primary,
       ),
     ];
 
@@ -95,12 +99,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           height: 160,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(colors: page.gradient, begin: Alignment.topLeft, end: Alignment.bottomRight),
-                            shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(color: page.gradient.first.withValues(alpha: 0.35), blurRadius: 36, offset: const Offset(0, 16)),
                             ],
                           ),
-                          child: Icon(page.icon, size: 68, color: Colors.white),
+                          child: Icon(page.icon, size: 68, color: page.iconColor),
                         ),
                         const SizedBox(height: 48),
                         Text(page.title, textAlign: TextAlign.center, style: AppTextStyles.h1.copyWith(fontSize: 26)),
@@ -127,7 +130,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   height: 8,
                   decoration: BoxDecoration(
                     color: active ? AppColors.primary : AppColors.divider,
-                    borderRadius: BorderRadius.circular(4),
                   ),
                 );
               }),

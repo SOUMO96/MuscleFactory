@@ -101,7 +101,6 @@ class _VerifyLoginScreenState extends State<VerifyLoginScreen> {
                 height: 56,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(colors: AppColors.primaryGradient),
-                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(Icons.verified_user_outlined, color: AppColors.background, size: 28),
               ),

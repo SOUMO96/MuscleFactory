@@ -187,7 +187,6 @@ class _SurveyScreenState extends State<SurveyScreen> {
                           height: 8,
                           decoration: BoxDecoration(
                             color: active ? AppColors.primary : AppColors.divider,
-                            borderRadius: BorderRadius.circular(4),
                           ),
                         );
                       }),
@@ -433,7 +432,6 @@ class _QuestionPage extends StatelessWidget {
               height: 72,
               decoration: BoxDecoration(
                 gradient: LinearGradient(colors: AppColors.primaryGradient),
-                shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 24, offset: const Offset(0, 10)),
                 ],
@@ -485,7 +483,6 @@ class _Stepper extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.divider),
       ),
       child: Row(
@@ -508,9 +505,7 @@ class _Stepper extends StatelessWidget {
     final enabled = onTap != null;
     return Material(
       color: enabled ? AppColors.primary.withValues(alpha: 0.15) : AppColors.surfaceVariant,
-      borderRadius: BorderRadius.circular(14),
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
         onTap: onTap,
         child: Container(
           width: 52,
@@ -540,7 +535,6 @@ class _OptionTile extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: selected ? AppColors.primary : AppColors.card,
-          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: selected ? AppColors.primary : AppColors.divider, width: selected ? 1.5 : 1),
         ),
         child: Text(
@@ -563,7 +557,6 @@ class _UnitToggle extends StatelessWidget {
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.divider),
       ),
       child: Row(
@@ -585,7 +578,6 @@ class _UnitToggle extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
         decoration: BoxDecoration(
           color: selected ? AppColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(9),
         ),
         child: Text(
           label,
@@ -623,7 +615,6 @@ class _GoalCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: selected ? AppColors.primary.withValues(alpha: 0.12) : AppColors.card,
-          borderRadius: BorderRadius.circular(18),
           border: Border.all(color: selected ? AppColors.primary : AppColors.divider, width: selected ? 1.5 : 1),
         ),
         child: Row(
@@ -634,7 +625,6 @@ class _GoalCard extends StatelessWidget {
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: selected ? AppColors.primary : AppColors.surfaceVariant,
-                borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(icon, color: selected ? AppColors.background : AppColors.primary, size: 22),
             ),

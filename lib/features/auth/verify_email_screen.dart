@@ -102,7 +102,6 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                 height: 56,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(colors: AppColors.primaryGradient),
-                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(Icons.mark_email_read_outlined, color: AppColors.background, size: 28),
               ),
