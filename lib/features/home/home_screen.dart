@@ -9,6 +9,7 @@ import '../../core/widgets/stat_card.dart';
 import '../../core/widgets/workout_card.dart';
 import '../../shared/data/dummy_data.dart';
 import '../../shared/models/app_user.dart';
+import '../nutrition/nutrition_screen.dart';
 import '../workouts/workout_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -167,11 +168,15 @@ class _QuickActionsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const actions = [
-      (icon: Icons.monitor_weight_outlined, label: 'Log Weight'),
-      (icon: Icons.water_drop_outlined, label: 'Water'),
-      (icon: Icons.restaurant_outlined, label: 'Add Meal'),
-      (icon: Icons.timer_outlined, label: 'Timer'),
+    final actions = [
+      (icon: Icons.monitor_weight_outlined, label: 'Log Weight', onTap: () {}),
+      (icon: Icons.water_drop_outlined, label: 'Water', onTap: () {}),
+      (
+        icon: Icons.restaurant_outlined,
+        label: 'Add Meal',
+        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NutritionScreen())),
+      ),
+      (icon: Icons.timer_outlined, label: 'Timer', onTap: () {}),
     ];
 
     return Row(
@@ -183,7 +188,7 @@ class _QuickActionsRow extends StatelessWidget {
                 Material(
                   color: AppColors.card,
                   child: InkWell(
-                    onTap: () {},
+                    onTap: a.onTap,
                     child: Container(
                       width: 64,
                       height: 64,

@@ -10,6 +10,7 @@ import '../../core/widgets/stat_card.dart';
 import '../../shared/models/app_user.dart';
 import '../../shared/models/workout_session.dart';
 import '../auth/login_screen.dart';
+import 'membership_screen.dart';
 import 'personal_information_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -95,6 +96,13 @@ class ProfileScreen extends StatelessWidget {
                               : () => Navigator.of(context).push(
                                     MaterialPageRoute(builder: (_) => PersonalInformationScreen(profile: profile)),
                                   ),
+                        ),
+                        _MenuItemData(
+                          icon: Icons.qr_code_rounded,
+                          label: 'Membership & Pass',
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const MembershipScreen()),
+                          ),
                         ),
                         const _MenuItemData(icon: Icons.flag_outlined, label: 'Goals & Targets'),
                         const _MenuItemData(icon: Icons.emoji_events_outlined, label: 'Achievements'),
