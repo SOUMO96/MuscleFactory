@@ -4,7 +4,7 @@ import '../../features/classes/classes_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/profile/profile_screen.dart';
 import '../../features/progress/progress_screen.dart';
-import '../../features/workouts/workouts_screen.dart';
+import '../../features/train/train_screen.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
@@ -22,12 +22,9 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _index = 0;
 
-  // Train and Me are still backed by the pre-redesign WorkoutsScreen /
-  // ProfileScreen widgets until Phase 3/4 rebuild them; the shell and its
-  // navigation are correct now, screen content catches up next.
   static const _screens = [
     HomeScreen(),
-    WorkoutsScreen(),
+    TrainScreen(),
     ClassesScreen(),
     ProgressScreen(),
     ProfileScreen(),
