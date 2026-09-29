@@ -38,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
   WorkoutPlan? _plan;
   PlanDay? _todayDay;
   int _todayExerciseCount = 0;
+  int _planDaysPerWeek = 0;
   List<DateTime> _finishedDaysThisWeek = [];
   int _streak = 0;
   double _volume7d = 0;
@@ -113,6 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _plan = plan;
       _todayDay = todayDay;
       _todayExerciseCount = todayExerciseCount;
+      _planDaysPerWeek = days.length;
       _finishedDaysThisWeek = finishedDaysThisWeek;
       _streak = streak;
       _volume7d = volume7d;
@@ -140,6 +142,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 24),
                     _HeroCard(plan: _plan, day: _todayDay, exerciseCount: _todayExerciseCount, onFinished: _load),
                     const SizedBox(height: 24),
+                    if (_planDaysPerWeek > 0) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('THIS WEEK', style: AppTextStyles.caption),
+                          Text(
+                            '${_finishedDaysThisWeek.length} of $_planDaysPerWeek done',
+                            style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                    ],
                     _WeekGrid(finishedDays: _finishedDaysThisWeek),
                     const SizedBox(height: 20),
                     StatRow(
@@ -197,6 +212,16 @@ class _Header extends StatelessWidget {
   }
 }
 
+const _weekdayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const _monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+String _greeting() {
+  final hour = DateTime.now().hour;
+  if (hour < 12) return 'Morning';
+  if (hour < 17) return 'Afternoon';
+  return 'Evening';
+}
+
 class _HeaderContent extends StatelessWidget {
   const _HeaderContent({required this.firstName, required this.initials});
   final String firstName;
@@ -204,15 +229,18 @@ class _HeaderContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final dateLabel = '${_weekdayNames[now.weekday - 1]} ${now.day} ${_monthNames[now.month - 1]}';
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Good Morning 👋', style: AppTextStyles.bodyMedium),
-            const SizedBox(height: 4),
-            Text(firstName, style: AppTextStyles.h1.copyWith(fontSize: 22)),
+            Text(dateLabel.toUpperCase(), style: AppTextStyles.caption),
+            const SizedBox(height: 6),
+            Text('${_greeting()}, $firstName', style: AppTextStyles.h1.copyWith(fontSize: 26)),
           ],
         ),
         Row(
@@ -332,27 +360,37 @@ class _WeekGrid extends StatelessWidget {
     final now = DateTime.now();
     final startOfWeek = DateTime(now.year, now.month, now.day).subtract(Duration(days: now.weekday - 1));
 
-    return Row(
-      children: List.generate(7, (i) {
-        final day = startOfWeek.add(Duration(days: i));
-        final isToday = day.year == now.year && day.month == now.month && day.day == now.day;
-        final done = finishedDays.any((d) => d.year == day.year && d.month == day.month && d.day == day.day);
-        return Expanded(
-          child: Container(
-            margin: EdgeInsets.only(right: i == 6 ? 0 : 4),
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(border: Border.all(color: isToday ? AppColors.primary : AppColors.divider, width: isToday ? 2 : 1)),
-            child: Column(
-              children: [
-                Text(_labels[i], style: AppTextStyles.caption.copyWith(color: isToday ? AppColors.primary : AppColors.textMuted)),
-                const SizedBox(height: 8),
-                Container(height: 12, width: double.infinity, margin: const EdgeInsets.symmetric(horizontal: 2), color: done ? AppColors.textPrimary : Colors.transparent),
-              ],
+    return Container(
+      decoration: BoxDecoration(border: Border(left: BorderSide(color: AppColors.divider, width: 2))),
+      child: Row(
+        children: List.generate(7, (i) {
+          final day = startOfWeek.add(Duration(days: i));
+          final isToday = day.year == now.year && day.month == now.month && day.day == now.day;
+          final done = finishedDays.any((d) => d.year == day.year && d.month == day.month && d.day == day.day);
+          return Expanded(
+            child: Container(
+              margin: EdgeInsets.only(left: isToday ? -2 : 0),
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(color: isToday ? AppColors.primary : AppColors.divider, width: 2),
+                  bottom: BorderSide(color: isToday ? AppColors.primary : AppColors.divider, width: 2),
+                  right: BorderSide(color: isToday ? AppColors.primary : AppColors.divider, width: 2),
+                  left: BorderSide(color: isToday ? AppColors.primary : Colors.transparent, width: 2),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(_labels[i], style: AppTextStyles.caption.copyWith(color: isToday ? AppColors.primary : AppColors.textMuted, fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 8),
+                  Container(height: 12, color: done ? AppColors.textPrimary : (isToday ? AppColors.primary.withValues(alpha: 0.25) : Colors.transparent)),
+                ],
+              ),
             ),
-          ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 }
@@ -387,29 +425,45 @@ class _UpcomingClassRow extends StatelessWidget {
   }
 }
 
+/// General reference daily calorie target -- not personalized (Home
+/// doesn't have a real per-user target to draw on), shown plainly as a
+/// baseline rather than fabricated precision.
+const _calorieGoal = 2200;
+
 class _NutritionRow extends StatelessWidget {
   const _NutritionRow({required this.calories});
   final int calories;
 
   @override
   Widget build(BuildContext context) {
+    final progress = (calories / _calorieGoal).clamp(0, 1).toDouble();
     return GestureDetector(
       onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NutritionScreen())),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(border: Border.all(color: AppColors.divider)),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Nutrition', style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w700)),
-                  Text('$calories kcal logged today', style: AppTextStyles.bodySmall),
-                ],
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Nutrition', style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w700)),
+                RichText(
+                  text: TextSpan(
+                    style: AppTextStyles.bodyMedium,
+                    children: [
+                      TextSpan(text: '$calories', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w800)),
+                      const TextSpan(text: ' / $_calorieGoal kcal'),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
+            const SizedBox(height: 10),
+            ClipRect(
+              child: LinearProgressIndicator(value: progress, minHeight: 6, backgroundColor: AppColors.surfaceVariant, color: AppColors.primary),
+            ),
           ],
         ),
       ),
