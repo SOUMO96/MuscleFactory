@@ -18,6 +18,7 @@ import '../nutrition/nutrition_screen.dart';
 import '../train/active_workout_screen.dart';
 import '../train/train_screen.dart';
 import 'log_weight_sheet.dart';
+import 'notifications_screen.dart';
 import 'timer_sheet.dart';
 
 /// Home dashboard -- a direct copy of the design's "02 Home" screen, now
@@ -214,15 +215,33 @@ class _HeaderContent extends StatelessWidget {
             Text(firstName, style: AppTextStyles.h1.copyWith(fontSize: 22)),
           ],
         ),
-        Container(
-          width: 44,
-          height: 44,
-          color: AppColors.primary,
-          alignment: Alignment.center,
-          child: Text(
-            initials.isEmpty ? '?' : initials,
-            style: AppTextStyles.h3.copyWith(color: AppColors.background),
-          ),
+        Row(
+          children: [
+            Material(
+              color: AppColors.surfaceVariant,
+              child: InkWell(
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NotificationsScreen())),
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(border: Border.all(color: AppColors.divider)),
+                  child: const Icon(Icons.notifications_none_rounded, size: 22),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Container(
+              width: 44,
+              height: 44,
+              color: AppColors.primary,
+              alignment: Alignment.center,
+              child: Text(
+                initials.isEmpty ? '?' : initials,
+                style: AppTextStyles.h3.copyWith(color: AppColors.background),
+              ),
+            ),
+          ],
         ),
       ],
     );

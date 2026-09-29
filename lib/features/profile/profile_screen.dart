@@ -10,6 +10,8 @@ import '../../core/widgets/stat_card.dart';
 import '../../shared/models/app_user.dart';
 import '../../shared/models/workout_session.dart';
 import '../auth/login_screen.dart';
+import 'achievements_screen.dart';
+import 'goals_targets_screen.dart';
 import 'membership_screen.dart';
 import 'personal_information_screen.dart';
 
@@ -104,8 +106,22 @@ class ProfileScreen extends StatelessWidget {
                             MaterialPageRoute(builder: (_) => const MembershipScreen()),
                           ),
                         ),
-                        const _MenuItemData(icon: Icons.flag_outlined, label: 'Goals & Targets'),
-                        const _MenuItemData(icon: Icons.emoji_events_outlined, label: 'Achievements'),
+                        _MenuItemData(
+                          icon: Icons.flag_outlined,
+                          label: 'Goals & Targets',
+                          onTap: profile == null
+                              ? null
+                              : () => Navigator.of(context).push(
+                                    MaterialPageRoute(builder: (_) => GoalsTargetsScreen(profile: profile)),
+                                  ),
+                        ),
+                        _MenuItemData(
+                          icon: Icons.emoji_events_outlined,
+                          label: 'Achievements',
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const AchievementsScreen()),
+                          ),
+                        ),
                       ]),
                       const SizedBox(height: 24),
                       Text('PREFERENCES', style: AppTextStyles.caption),

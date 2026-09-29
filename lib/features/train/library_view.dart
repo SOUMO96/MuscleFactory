@@ -105,27 +105,75 @@ class _LibraryViewState extends State<LibraryView> {
                       separatorBuilder: (_, __) => Divider(height: 1, color: AppColors.divider),
                       itemBuilder: (context, i) {
                         final e = _results[i];
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(e.name, style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w700)),
-                                    const SizedBox(height: 2),
-                                    Text('${e.category} · ${e.equipment}', style: AppTextStyles.bodySmall),
-                                  ],
+                        return InkWell(
+                          onTap: () => showModalBottomSheet(
+                            context: context,
+                            backgroundColor: AppColors.surface,
+                            builder: (_) => _ExerciseDetailSheet(exercise: e),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(e.name, style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w700)),
+                                      const SizedBox(height: 2),
+                                      Text('${e.category} · ${e.equipment}', style: AppTextStyles.bodySmall),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                                Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
+                              ],
+                            ),
                           ),
                         );
                       },
                     ),
         ),
       ],
+    );
+  }
+}
+
+class _ExerciseDetailSheet extends StatelessWidget {
+  const _ExerciseDetailSheet({required this.exercise});
+  final Exercise exercise;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(exercise.name, style: AppTextStyles.h2),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(border: Border.all(color: AppColors.divider)),
+                child: Text(exercise.category.toUpperCase(), style: AppTextStyles.caption),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(border: Border.all(color: AppColors.divider)),
+                child: Text(exercise.equipment.toUpperCase(), style: AppTextStyles.caption),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            exercise.description.isEmpty ? 'No description yet.' : exercise.description,
+            style: AppTextStyles.bodyMedium,
+          ),
+        ],
+      ),
     );
   }
 }
