@@ -21,6 +21,14 @@ class WorkoutSessionRepository {
     return _sessions.update({'ended_at': DateTime.now().toUtc().toIso8601String()}).eq('id', sessionId);
   }
 
+  /// Discards a session that was started but never actually logged
+  /// anything -- used when the user backs out of Active Workout
+  /// immediately, so an empty session doesn't count toward the plan's
+  /// day rotation, streaks, or workout counts.
+  Future<void> deleteSession(String sessionId) {
+    return _sessions.delete().eq('id', sessionId);
+  }
+
   Future<void> logSet({
     required String sessionId,
     required String exerciseId,
@@ -44,11 +52,6 @@ class WorkoutSessionRepository {
         .order('started_at', ascending: false)
         .limit(limit);
     return rows.map(WorkoutSession.fromMap).toList();
-  }
-
-  Future<List<LoggedSet>> setsForSession(String sessionId) async {
-    final rows = await _sets.select('*, exercises(name)').eq('session_id', sessionId).order('set_index');
-    return rows.map(LoggedSet.fromMap).toList();
   }
 
   /// All sets logged by [userId] since [since] (defaults to 90 days back),

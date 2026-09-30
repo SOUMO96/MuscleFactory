@@ -18,11 +18,6 @@ class PlanRepository {
     return WorkoutPlan.fromMap(row);
   }
 
-  Future<List<WorkoutPlan>> listPlans(String userId) async {
-    final rows = await _plans.select().eq('user_id', userId).order('created_at', ascending: false);
-    return rows.map(WorkoutPlan.fromMap).toList();
-  }
-
   Future<List<PlanDay>> getPlanDays(String planId) async {
     final rows = await _planDays.select().eq('plan_id', planId).order('day_index');
     return rows.map(PlanDay.fromMap).toList();
@@ -82,6 +77,4 @@ class PlanRepository {
       'notes': notes,
     });
   }
-
-  Future<void> deletePlan(String planId) => _plans.delete().eq('id', planId);
 }

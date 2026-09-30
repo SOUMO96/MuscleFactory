@@ -136,6 +136,23 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
     Navigator.of(context).pop();
   }
 
+  /// The X button: if nothing was logged yet, discard the session
+  /// entirely rather than marking it finished -- otherwise backing out
+  /// immediately would still count as a completed workout (advancing
+  /// the plan's day rotation and streak) despite doing nothing.
+  Future<void> _close() async {
+    final loggedAnything = _logged.values.any((sets) => sets.isNotEmpty);
+    if (_sessionId != null) {
+      if (loggedAnything) {
+        await WorkoutSessionRepository.instance.endSession(_sessionId!);
+      } else {
+        await WorkoutSessionRepository.instance.deleteSession(_sessionId!);
+      }
+    }
+    if (!mounted) return;
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) {
@@ -150,7 +167,7 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
               child: Row(
                 children: [
-                  IconButton(icon: const Icon(Icons.close_rounded), onPressed: _finish),
+                  IconButton(icon: const Icon(Icons.close_rounded), onPressed: _close),
                   Expanded(
                     child: Text(widget.dayLabel, style: AppTextStyles.h3, textAlign: TextAlign.center),
                   ),

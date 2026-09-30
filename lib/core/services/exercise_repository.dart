@@ -27,10 +27,4 @@ class ExerciseRepository {
     final categories = rows.map((r) => r['category'] as String).toSet().toList()..sort();
     return categories;
   }
-
-  Future<Exercise?> getById(String id) async {
-    final row = await _exercises.select().eq('id', id).maybeSingle();
-    if (row == null) return null;
-    return Exercise.fromMap(row);
-  }
 }

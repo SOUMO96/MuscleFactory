@@ -7,6 +7,7 @@ import '../../features/progress/progress_screen.dart';
 import '../../features/train/train_screen.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
+import 'main_tab_controller.dart';
 
 /// Root app shell: bottom navigation with 5 tabs (Home / Train / Classes /
 /// Progress / Me), matching the Modernist redesign -- no center-docked FAB;
@@ -31,6 +32,20 @@ class _MainShellState extends State<MainShell> {
   ];
 
   void _select(int index) => setState(() => _index = index);
+
+  @override
+  void initState() {
+    super.initState();
+    MainTabController.instance.addListener(_onTabRequested);
+  }
+
+  @override
+  void dispose() {
+    MainTabController.instance.removeListener(_onTabRequested);
+    super.dispose();
+  }
+
+  void _onTabRequested() => _select(MainTabController.instance.requestedIndex);
 
   @override
   Widget build(BuildContext context) {

@@ -17,7 +17,6 @@ class AppColors {
   static Color card = _dark.card;
 
   static Color primary = _dark.primary;
-  static Color primaryDark = _dark.primaryDark;
   static Color secondary = _dark.secondary;
 
   static Color success = _dark.success;
@@ -35,13 +34,12 @@ class AppColors {
   /// Deep accent, for text-on-light-accent-background states.
   static Color accentDeep = _dark.accentDeep;
 
-  /// Flat "gradients" (both stops equal) so existing gradient-based widgets
-  /// keep compiling and already read as solid Modernist color blocks; Phase
-  /// 3 replaces the widgets themselves with true flat fills + border rules.
+  /// Flat "gradient" (both stops equal) so the handful of remaining
+  /// gradient-based widgets (PrimaryButton, the auth screens' icon
+  /// badges) keep compiling and already read as solid Modernist color
+  /// blocks.
   static List<Color> primaryGradient = _dark.primaryGradient;
-  static List<Color> orangeGradient = _dark.orangeGradient;
   static List<Color> heroGradient = _dark.heroGradient;
-  static List<List<Color>> workoutGradients = _dark.workoutGradients;
 
   static void apply(Brightness brightness) {
     final set = brightness == Brightness.dark ? _dark : _light;
@@ -50,7 +48,6 @@ class AppColors {
     surfaceVariant = set.surfaceVariant;
     card = set.card;
     primary = set.primary;
-    primaryDark = set.primaryDark;
     secondary = set.secondary;
     success = set.success;
     warning = set.warning;
@@ -62,9 +59,7 @@ class AppColors {
     accentSoft = set.accentSoft;
     accentDeep = set.accentDeep;
     primaryGradient = set.primaryGradient;
-    orangeGradient = set.orangeGradient;
     heroGradient = set.heroGradient;
-    workoutGradients = set.workoutGradients;
   }
 }
 
@@ -75,7 +70,6 @@ class _AppColorSet {
     required this.surfaceVariant,
     required this.card,
     required this.primary,
-    required this.primaryDark,
     required this.secondary,
     required this.success,
     required this.warning,
@@ -93,7 +87,6 @@ class _AppColorSet {
   final Color surfaceVariant;
   final Color card;
   final Color primary;
-  final Color primaryDark;
   final Color secondary;
   final Color success;
   final Color warning;
@@ -106,16 +99,7 @@ class _AppColorSet {
   final Color accentDeep;
 
   List<Color> get primaryGradient => [primary, primary];
-  List<Color> get orangeGradient => [secondary, secondary];
   List<Color> get heroGradient => [background, background];
-  List<List<Color>> get workoutGradients => [
-        [primary, primary],
-        [Color.alphaBlend(textPrimary.withValues(alpha: 0.85), primary), primary],
-        [textPrimary, textPrimary],
-        [primary, primary],
-        [Color.alphaBlend(textPrimary.withValues(alpha: 0.85), primary), primary],
-        [textPrimary, textPrimary],
-      ];
 }
 
 const _lightText = Color(0xFF201E1D);
@@ -127,7 +111,6 @@ final _light = _AppColorSet(
   surfaceVariant: const Color(0xFFEAE7E7),
   card: const Color(0xFFEAE9E9),
   primary: const Color(0xFFEC3013),
-  primaryDark: const Color(0xFFAE1800),
   secondary: const Color(0xFFFF563C),
   success: const Color(0xFF1E8E3E),
   warning: const Color(0xFFB45309),
@@ -146,7 +129,6 @@ final _dark = _AppColorSet(
   surfaceVariant: const Color(0xFF2A2827),
   card: const Color(0xFF232120),
   primary: const Color(0xFFF0391C),
-  primaryDark: const Color(0xFFFF9783),
   secondary: const Color(0xFFFF563C),
   success: const Color(0xFF3FBE6B),
   warning: const Color(0xFFE0A339),

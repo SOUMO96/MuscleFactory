@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/navigation/main_tab_controller.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/class_repository.dart';
 import '../../core/services/nutrition_repository.dart';
@@ -16,7 +17,6 @@ import '../../shared/models/workout_plan.dart';
 import '../../shared/models/workout_session.dart';
 import '../nutrition/nutrition_screen.dart';
 import '../train/active_workout_screen.dart';
-import '../train/train_screen.dart';
 import 'log_weight_sheet.dart';
 import 'notifications_screen.dart';
 import 'timer_sheet.dart';
@@ -300,7 +300,7 @@ class _HeroCard extends StatelessWidget {
               label: 'Go to Train',
               icon: Icons.arrow_forward_rounded,
               expand: false,
-              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TrainScreen())),
+              onPressed: () => MainTabController.instance.goToTab(1),
             ),
           ],
         ),
