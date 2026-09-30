@@ -7,6 +7,7 @@ import '../../core/services/auth_service.dart';
 import '../../core/services/user_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import 'login_screen.dart';
 import 'otp_boxes.dart';
 import 'verified_screen.dart';
 
@@ -140,7 +141,18 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                 child: IconButton(
                   padding: EdgeInsets.zero,
                   icon: const Icon(Icons.arrow_back_rounded),
-                  onPressed: () => Navigator.of(context).pop(),
+                  // Reached from SignupScreen via pushAndRemoveUntil (the
+                  // stack is deliberately cleared so a verified user can't
+                  // navigate back into a stale signup form) -- a plain
+                  // pop() would then have nothing to pop to and silently
+                  // do nothing. Fall back to LoginScreen in that case.
+                  onPressed: () {
+                    if (Navigator.of(context).canPop()) {
+                      Navigator.of(context).pop();
+                    } else {
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen()));
+                    }
+                  },
                 ),
               ),
               const SizedBox(height: 28),

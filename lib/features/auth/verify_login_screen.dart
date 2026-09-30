@@ -8,6 +8,7 @@ import '../../core/services/user_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../survey/survey_screen.dart';
+import 'login_screen.dart';
 import 'otp_boxes.dart';
 
 /// Step-up check shown after a correct password, on every login (same
@@ -133,7 +134,13 @@ class _VerifyLoginScreenState extends State<VerifyLoginScreen> {
                 child: IconButton(
                   padding: EdgeInsets.zero,
                   icon: const Icon(Icons.arrow_back_rounded),
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () {
+                    if (Navigator.of(context).canPop()) {
+                      Navigator.of(context).pop();
+                    } else {
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen()));
+                    }
+                  },
                 ),
               ),
               const SizedBox(height: 28),
