@@ -49,3 +49,18 @@ app.*.map.json
 
 # Firebase CLI local deploy cache
 .firebase/
+# Design handoff exports (source assets, not needed to build the app)
+Muscle Factory app design-handoff*
+
+# Secrets and machine-specific config: never commit these
+.env
+.env.*
+!.env.example
+supabase/.env
+*.jks
+*.keystore
+android/key.properties
+android/local.properties
+google-services.json
+GoogleService-Info.plist
+lib/firebase_options.dart
