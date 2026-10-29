@@ -3,11 +3,8 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
-/// One cell in a [StatRow]: a big number and a small label underneath,
-/// optionally with a trend string next to the number. No card chrome of
-/// its own -- [StatRow] supplies the shared border strip around and
-/// between cells, matching the Modernist design's stat pattern used
-/// throughout Home / Progress / Profile / Nutrition.
+/// One cell in a [StatRow]: a big number with a small label, and an optional
+/// trend string. [StatRow] draws the shared borders between cells.
 class StatCell extends StatelessWidget {
   const StatCell({
     super.key,
@@ -48,9 +45,8 @@ class StatCell extends StatelessWidget {
   }
 }
 
-/// Lays out [StatCell]s (or any equal-width children) in the Modernist
-/// grid-strip pattern: a 2px rule above and below, 1px dividers between
-/// cells, no individual card borders or radius.
+/// Lays out [StatCell]s (or any equal-width children) in a strip: a 2px rule
+/// above and below, 1px dividers between cells, no card borders or radius.
 class StatRow extends StatelessWidget {
   const StatRow({super.key, required this.children});
 

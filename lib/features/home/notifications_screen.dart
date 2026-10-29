@@ -16,10 +16,8 @@ class _NotificationItem {
   final DateTime time;
 }
 
-/// A real activity feed (today's booked classes, this week's finished
-/// workouts, recent PRs) rather than a placeholder bell with nothing
-/// behind it -- there's no dedicated notifications table, so this reads
-/// directly from the same real data the rest of the app already has.
+/// An activity feed built from existing data (classes booked today, workouts
+/// finished this week, recent PRs); there's no notifications table.
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
 

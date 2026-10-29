@@ -1,9 +1,6 @@
-/// Supabase project connection details.
-///
-/// The publishable/anon key is safe to ship in client code by design --
-/// it's meant to be public, with access actually enforced by Postgres Row
-/// Level Security policies (see supabase/migrations/). Never put the
-/// secret/service_role key here.
+/// Supabase connection details.
+/// The publishable key is meant to be public; Row Level Security does the
+/// enforcing (see supabase/migrations/). Never put the service_role key here.
 class SupabaseOptions {
   SupabaseOptions._();
 

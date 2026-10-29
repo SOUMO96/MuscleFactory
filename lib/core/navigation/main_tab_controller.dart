@@ -1,10 +1,7 @@
 import 'package:flutter/foundation.dart';
 
-/// Lets any screen request MainShell switch its selected bottom tab --
-/// needed because tabs like Train have no AppBar/back button of their
-/// own (they rely on being embedded in MainShell's bottom nav), so
-/// pushing them as a standalone route would strand the user with no way
-/// to navigate elsewhere.
+/// Lets any screen ask MainShell to switch tabs. Tabs like Train have no back
+/// button, so pushing them as standalone routes would strand the user.
 class MainTabController extends ChangeNotifier {
   MainTabController._();
   static final MainTabController instance = MainTabController._();

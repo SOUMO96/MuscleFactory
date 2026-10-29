@@ -9,10 +9,8 @@ import '../../core/theme/app_text_styles.dart';
 import '../../shared/models/app_user.dart';
 import '../../shared/models/workout_session.dart';
 
-/// Real personal-pass QR (encodes the user's id, generated on-device via
-/// qr_flutter) plus a real check-in count derived from finished workout
-/// sessions this month. No real turnstile/hardware integration, per the
-/// redesign plan's scope notes.
+/// Personal pass: a QR code of the user's id (generated on-device) and this
+/// month's check-in count from finished workouts. No turnstile integration.
 class MembershipScreen extends StatefulWidget {
   const MembershipScreen({super.key});
 

@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 
-/// Central color palette for Muscle Factory -- the "Modernist" system: warm
-/// ink-on-paper neutrals, one red accent, no gradients.
-///
-/// Fields are mutable (not `const`) so the whole app can switch light/dark
-/// at runtime without every call site reading through `Theme.of(context)`:
-/// call [AppColors.apply] once per rebuild (see `AppThemeController` /
-/// `main.dart`) and every existing `AppColors.xxx` reference picks up the
-/// new value on its next `build()`.
+/// Color palette: warm neutrals, one red accent, no gradients.
+/// Fields are mutable, not const, so the app can switch light/dark at runtime
+/// without every call site going through Theme.of(context). Call
+/// [AppColors.apply] on each rebuild (see AppThemeController and main.dart).
 class AppColors {
   AppColors._();
 
@@ -34,10 +30,8 @@ class AppColors {
   /// Deep accent, for text-on-light-accent-background states.
   static Color accentDeep = _dark.accentDeep;
 
-  /// Flat "gradient" (both stops equal) so the handful of remaining
-  /// gradient-based widgets (PrimaryButton, the auth screens' icon
-  /// badges) keep compiling and already read as solid Modernist color
-  /// blocks.
+  /// A flat "gradient" (both stops equal) for widgets that still expect a
+  /// gradient, such as PrimaryButton and the auth icon badges.
   static List<Color> primaryGradient = _dark.primaryGradient;
   static List<Color> heroGradient = _dark.heroGradient;
 

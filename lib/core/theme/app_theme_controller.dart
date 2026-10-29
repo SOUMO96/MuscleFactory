@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// Holds the user's theme preference (light / dark / follow system) so the
-/// whole app can react to it. A real per-user setting lands on the Me tab
-/// in a later phase (backed by the `theme_preference` profile column) --
-/// this controller is the plumbing that setting will call into.
+/// Holds the theme preference (light / dark / follow system) so the whole app
+/// can react to changes. The per-user setting lives in Profile -> Appearance.
 class AppThemeController extends ChangeNotifier {
   AppThemeController._();
   static final AppThemeController instance = AppThemeController._();
@@ -16,4 +14,12 @@ class AppThemeController extends ChangeNotifier {
     _mode = mode;
     notifyListeners();
   }
+
+  /// The brightness [mode] currently resolves to. Used by main.dart and by
+  /// MainShell, which keys its content on it to rebuild on theme change.
+  Brightness get resolvedBrightness => switch (_mode) {
+        ThemeMode.light => Brightness.light,
+        ThemeMode.dark => Brightness.dark,
+        ThemeMode.system => WidgetsBinding.instance.platformDispatcher.platformBrightness,
+      };
 }

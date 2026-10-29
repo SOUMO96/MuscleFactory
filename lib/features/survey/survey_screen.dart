@@ -12,11 +12,9 @@ enum _HeightUnit { cm, ft }
 
 const _pageCount = 8;
 
-/// One-time onboarding survey shown right after a user's first successful
-/// sign-up/sign-in (see UserRepository.ensureProfile). One question per
-/// page: name, age, gender, height, current weight, goal, target weight +
-/// duration, training days/week -- then writes it all to the user's
-/// Supabase profile row and marks the survey complete.
+/// One-time survey after a user's first sign-in, one question per page: name,
+/// age, gender, height, weight, goal, target weight and duration, training
+/// days. Writes the answers to the profile row and marks the survey done.
 class SurveyScreen extends StatefulWidget {
   const SurveyScreen({super.key});
 

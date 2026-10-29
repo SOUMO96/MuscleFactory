@@ -12,8 +12,10 @@ import '../../shared/models/workout_session.dart';
 import '../auth/login_screen.dart';
 import 'achievements_screen.dart';
 import 'goals_targets_screen.dart';
+import 'help_support_screen.dart';
 import 'membership_screen.dart';
 import 'personal_information_screen.dart';
+import 'privacy_policy_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -130,9 +132,21 @@ class ProfileScreen extends StatelessWidget {
                       const SizedBox(height: 24),
                       Text('SUPPORT', style: AppTextStyles.caption),
                       const SizedBox(height: 10),
-                      const _MenuCard(items: [
-                        _MenuItemData(icon: Icons.help_outline_rounded, label: 'Help & Support'),
-                        _MenuItemData(icon: Icons.privacy_tip_outlined, label: 'Privacy Policy'),
+                      _MenuCard(items: [
+                        _MenuItemData(
+                          icon: Icons.help_outline_rounded,
+                          label: 'Help & Support',
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const HelpSupportScreen()),
+                          ),
+                        ),
+                        _MenuItemData(
+                          icon: Icons.privacy_tip_outlined,
+                          label: 'Privacy Policy',
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()),
+                          ),
+                        ),
                       ]),
                       const SizedBox(height: 28),
                       Material(
@@ -172,9 +186,7 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
-/// Real workout/PR/streak counts computed from logged workout sessions and
-/// sets, replacing the old hardcoded-0 "Followers" stat row (which never
-/// made sense for a solo fitness app).
+/// Workout, PR and streak counts computed from logged sessions and sets.
 class _ProfileStatsRow extends StatefulWidget {
   const _ProfileStatsRow({required this.userId});
   final String userId;
@@ -414,7 +426,6 @@ class _PreferencesCard extends StatefulWidget {
 
 class _PreferencesCardState extends State<_PreferencesCard> {
   late UnitPreference _unit = widget.profile.unitPreference;
-  late ThemePreference _theme = widget.profile.themePreference;
   late bool _reminders = widget.profile.workoutRemindersEnabled;
   late int _restSeconds = widget.profile.defaultRestSeconds;
 
@@ -425,8 +436,12 @@ class _PreferencesCardState extends State<_PreferencesCard> {
     UserRepository.instance.updateSettings(uid: widget.uid, unitPreference: unit);
   }
 
+  // No local `_theme` field seeded from widget.profile like the other settings.
+  // Picking a theme rebuilds this whole screen (see MainShell), which would reset
+  // such a field to the stale profile value before the database write lands.
+  // The selector reads AppThemeController.instance.mode instead, which is set
+  // synchronously.
   void _setTheme(ThemePreference theme) {
-    setState(() => _theme = theme);
     UserRepository.instance.updateSettings(uid: widget.uid, themePreference: theme);
     AppThemeController.instance.setMode(switch (theme) {
       ThemePreference.light => ThemeMode.light,
@@ -465,7 +480,11 @@ class _PreferencesCardState extends State<_PreferencesCard> {
             label: 'Appearance',
             trailing: _Segmented(
               options: const ['Light', 'Dark', 'Auto'],
-              selectedIndex: switch (_theme) { ThemePreference.light => 0, ThemePreference.dark => 1, ThemePreference.system => 2 },
+              selectedIndex: switch (AppThemeController.instance.mode) {
+                ThemeMode.light => 0,
+                ThemeMode.dark => 1,
+                ThemeMode.system => 2,
+              },
               onSelected: (i) => _setTheme([ThemePreference.light, ThemePreference.dark, ThemePreference.system][i]),
             ),
           ),

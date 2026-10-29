@@ -5,11 +5,8 @@ import '../../core/theme/app_colors.dart';
 import '../auth/login_screen.dart';
 import '../auth/signup_screen.dart';
 
-/// App entry screen -- a direct copy of the design handoff's "1c Welcome"
-/// poster screen (Muscle Factory.dc.html): a black hero-photo panel over a
-/// red wordmark panel with SSO / email sign-up actions and a log-in link.
-/// These colors are fixed (matching the mock, which doesn't use the
-/// light/dark theme tokens for this screen) rather than theme-adaptive.
+/// Entry screen: a hero-photo panel over a red wordmark panel, with SSO and
+/// email sign-up actions and a log-in link. Colors are fixed, not theme-adaptive.
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -56,9 +53,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       backgroundColor: _ink,
       body: Column(
         children: [
-          // Hero photo panel. The mock itself uses a plain placeholder
-          // here too ("hero photo · lifter · b/w") since no real photo
-          // asset exists -- kept honest rather than faking a stock image.
+          // Hero photo panel: a plain placeholder, since there's no real photo asset yet.
           Expanded(
             child: Container(
               width: double.infinity,

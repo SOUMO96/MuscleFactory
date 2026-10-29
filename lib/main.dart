@@ -45,20 +45,9 @@ class _MuscleFactoryAppState extends State<MuscleFactoryApp> with WidgetsBinding
     if (AppThemeController.instance.mode == ThemeMode.system) setState(() {});
   }
 
-  Brightness get _brightness {
-    switch (AppThemeController.instance.mode) {
-      case ThemeMode.light:
-        return Brightness.light;
-      case ThemeMode.dark:
-        return Brightness.dark;
-      case ThemeMode.system:
-        return WidgetsBinding.instance.platformDispatcher.platformBrightness;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final brightness = _brightness;
+    final brightness = AppThemeController.instance.resolvedBrightness;
     // Sets the AppColors.* static values every existing screen reads
     // directly -- must happen before MaterialApp (and everything under it)
     // builds, since Flutter builds top-down.

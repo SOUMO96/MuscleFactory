@@ -7,12 +7,10 @@ import '../../features/progress/progress_screen.dart';
 import '../../features/train/train_screen.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
+import '../theme/app_theme_controller.dart';
 import 'main_tab_controller.dart';
 
-/// Root app shell: bottom navigation with 5 tabs (Home / Train / Classes /
-/// Progress / Me), matching the Modernist redesign -- no center-docked FAB;
-/// "start a workout" now lives directly on Home and on each plan day in
-/// Train instead of a separate quick-start sheet.
+/// Root shell with five bottom tabs: Home, Train, Classes, Progress, Me.
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
 
@@ -37,20 +35,30 @@ class _MainShellState extends State<MainShell> {
   void initState() {
     super.initState();
     MainTabController.instance.addListener(_onTabRequested);
+    // AppColors is read through static getters, not Theme.of(context), so built
+    // widgets can't tell when the theme changes. Keying the IndexedStack on
+    // brightness rebuilds the whole subtree and picks up the new colors without
+    // touching navigation state.
+    AppThemeController.instance.addListener(_onThemeChanged);
   }
 
   @override
   void dispose() {
     MainTabController.instance.removeListener(_onTabRequested);
+    AppThemeController.instance.removeListener(_onThemeChanged);
     super.dispose();
   }
 
   void _onTabRequested() => _select(MainTabController.instance.requestedIndex);
+  void _onThemeChanged() => setState(() {});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(index: _index, children: _screens),
+      body: KeyedSubtree(
+        key: ValueKey(AppThemeController.instance.resolvedBrightness),
+        child: IndexedStack(index: _index, children: _screens),
+      ),
       bottomNavigationBar: DecoratedBox(
         decoration: BoxDecoration(
           color: AppColors.surface,

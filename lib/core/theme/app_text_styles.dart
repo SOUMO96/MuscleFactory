@@ -3,15 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'app_colors.dart';
 
-/// Named text styles built on Archivo (the "Modernist" system's typeface) --
-/// sharp, heavy, all-business.
-///
-/// Sizes intentionally match the app's *previous* type scale rather than
-/// the design mock's larger headings (h1 42 / h2 32 / h3 25 in
-/// styles.css): repointing these names to those sizes now would blow out
-/// every existing screen's layout before Phase 3 reworks each screen to
-/// the new scale. New Modernist-scale styles land alongside these as
-/// screens are rebuilt, rather than mutating these out from under them.
+/// Named text styles in Archivo: heavy and sharp.
+/// Sizes stay at the app's original scale rather than the design mock's larger
+/// headings (h1 42 / h2 32 / h3 25), to avoid reflowing existing screens.
 class AppTextStyles {
   AppTextStyles._();
 

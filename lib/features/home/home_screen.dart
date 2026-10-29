@@ -21,12 +21,8 @@ import 'log_weight_sheet.dart';
 import 'notifications_screen.dart';
 import 'timer_sheet.dart';
 
-/// Home dashboard -- a direct copy of the design's "02 Home" screen, now
-/// backed entirely by real data: today's workout from the active plan,
-/// a real weekly completion grid, real stats, the next booked class, and
-/// today's nutrition total. Replaces the earlier version, which showed
-/// unrelated dummy workout-library cards instead of the user's actual
-/// plan.
+/// Home dashboard: today's workout from the active plan, the weekly completion
+/// grid, stats, the next booked class and today's nutrition total.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -368,24 +364,26 @@ class _WeekGrid extends StatelessWidget {
           final isToday = day.year == now.year && day.month == now.month && day.day == now.day;
           final done = finishedDays.any((d) => d.year == day.year && d.month == day.month && d.day == day.day);
           return Expanded(
-            child: Container(
-              margin: EdgeInsets.only(left: isToday ? -2 : 0),
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(color: isToday ? AppColors.primary : AppColors.divider, width: 2),
-                  bottom: BorderSide(color: isToday ? AppColors.primary : AppColors.divider, width: 2),
-                  right: BorderSide(color: isToday ? AppColors.primary : AppColors.divider, width: 2),
-                  left: BorderSide(color: isToday ? AppColors.primary : Colors.transparent, width: 2),
+            child: Transform.translate(
+              offset: Offset(isToday ? -2 : 0, 0),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(color: isToday ? AppColors.primary : AppColors.divider, width: 2),
+                    bottom: BorderSide(color: isToday ? AppColors.primary : AppColors.divider, width: 2),
+                    right: BorderSide(color: isToday ? AppColors.primary : AppColors.divider, width: 2),
+                    left: BorderSide(color: isToday ? AppColors.primary : Colors.transparent, width: 2),
+                  ),
                 ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(_labels[i], style: AppTextStyles.caption.copyWith(color: isToday ? AppColors.primary : AppColors.textMuted, fontWeight: FontWeight.w800)),
-                  const SizedBox(height: 8),
-                  Container(height: 12, color: done ? AppColors.textPrimary : (isToday ? AppColors.primary.withValues(alpha: 0.25) : Colors.transparent)),
-                ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(_labels[i], style: AppTextStyles.caption.copyWith(color: isToday ? AppColors.primary : AppColors.textMuted, fontWeight: FontWeight.w800)),
+                    const SizedBox(height: 8),
+                    Container(height: 12, color: done ? AppColors.textPrimary : (isToday ? AppColors.primary.withValues(alpha: 0.25) : Colors.transparent)),
+                  ],
+                ),
               ),
             ),
           );
