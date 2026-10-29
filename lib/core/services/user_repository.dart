@@ -4,11 +4,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../shared/models/app_user.dart';
 
-/// Reads and writes profile rows in Supabase Postgres (`public.profiles`).
-///
-/// Row creation itself is handled automatically by a database trigger
-/// (see supabase/migrations/) whenever a new auth user is created, for
-/// both email/password sign-up and Google sign-in alike.
+/// Reads and writes profile rows (`public.profiles`). Rows are created by a
+/// database trigger when an auth user is created (see supabase/migrations/).
 class UserRepository {
   UserRepository._();
   static final UserRepository instance = UserRepository._();
@@ -21,15 +18,11 @@ class UserRepository {
     return AppUser.fromMap(row);
   }
 
-  // Home, Profile and Progress all watch the same uid independently, and
-  // each StreamBuilder re-reads this every rebuild (e.g. when the browser
-  // tab regains focus). Calling `.stream()` fresh each time tore down and
-  // re-opened a new Supabase realtime subscription every rebuild, which
-  // briefly reset each screen to its no-data fallback ("Athlete") until
-  // the new subscription's first snapshot arrived -- and would stay stuck
-  // there if that round-trip didn't complete. Caching one subscription
-  // per uid and replaying its last value to every new listener fixes
-  // both the redundant resubscribing and the fallback flicker.
+  // Home, Profile and Progress watch the same uid, and each StreamBuilder
+  // re-reads this on every rebuild. Opening a fresh realtime subscription each
+  // time reset screens to their "Athlete" fallback until the first snapshot
+  // arrived. Caching one subscription per uid and replaying its last value
+  // fixes both.
   final Map<String, _ProfileStream> _profileStreams = {};
 
   Stream<AppUser?> watchUserProfile(String uid) {
@@ -127,31 +120,24 @@ class UserRepository {
   }
 }
 
-/// One shared Supabase realtime subscription for a given profile row,
-/// broadcast to however many screens are currently watching it. Replays
-/// the last known value to each new listener so a screen that starts
-/// watching after the initial snapshot already arrived (e.g. navigating
-/// to a different tab) isn't left waiting for the next database change.
-///
-/// Right after a fresh login, the realtime subscription's own initial
-/// snapshot has been observed to occasionally race ahead of the new
-/// session's auth context and come back with zero rows. The profile row
-/// always exists once a user is signed in (a database trigger creates
-/// it at sign-up), so an empty/null result is never trustworthy: it is
-/// always ignored rather than cached or broadcast, from either the
-/// retry-seed below or the realtime listener. This matters even after a
-/// real value has already loaded, because the two sources race
-/// independently -- a slower, separately-racing empty result from the
-/// realtime side has been observed to land *after* the retry-seed
-/// already succeeded, which (when null was allowed through once a value
-/// existed) clobbered a correct name back to placeholder copy
-/// ("Athlete") a second or two after it briefly showed correctly.
+/// One shared realtime subscription for a profile row, broadcast to every
+/// screen watching it. The last value is replayed to new listeners.
+/// Right after login the realtime snapshot can race ahead of the session's
+/// auth context and return zero rows. The profile row always exists for a
+/// signed-in user, so empty results are ignored everywhere, even once a value
+/// is cached; otherwise a late empty result overwrites a correct name.
 class _ProfileStream {
   _ProfileStream(this._profiles, this._uid) {
     _retrySeed();
     _profiles.stream(primaryKey: ['id']).eq('id', _uid).map(
       (rows) => rows.isEmpty ? null : AppUser.fromMap(rows.first),
-    ).listen(_handle, onError: _controller.addError);
+    ).listen(
+      _handle,
+      // A realtime channel error (e.g. a transient reconnect failure) says nothing
+      // about whether the cached profile is still right. Forwarding it made every
+      // StreamBuilder drop to its null/"Athlete" fallback, so errors are swallowed.
+      onError: (_, __) {},
+    );
   }
 
   final SupabaseQueryBuilder _profiles;
@@ -183,8 +169,12 @@ class _ProfileStream {
     }
   }
 
-  Stream<AppUser?> get stream async* {
-    if (_hasValue) yield _lastValue;
-    yield* _controller.stream;
-  }
+  // Stream.multi instead of an async* generator: a generator only starts on the
+  // next microtask after listen(), so a listener subscribing at that moment
+  // could miss the cached value. Stream.multi runs its setup synchronously.
+  Stream<AppUser?> get stream => Stream.multi((controller) {
+        if (_hasValue) controller.add(_lastValue);
+        final sub = _controller.stream.listen(controller.add, onError: controller.addError);
+        controller.onCancel = sub.cancel;
+      });
 }

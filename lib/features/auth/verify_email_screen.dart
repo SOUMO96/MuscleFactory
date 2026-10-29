@@ -11,10 +11,8 @@ import 'login_screen.dart';
 import 'otp_boxes.dart';
 import 'verified_screen.dart';
 
-/// Direct copy of the design handoff's "Auth Verify" screen
-/// (MF Auth.dc.html), used after sign-up or after a login attempt on an
-/// unconfirmed account. Asks for the 6-digit code Supabase emailed to
-/// [email] instead of relying on a clickable confirmation link.
+/// Asks for the 6-digit code emailed to [email], after sign-up or after a
+/// login attempt on an unconfirmed account.
 class VerifyEmailScreen extends StatefulWidget {
   const VerifyEmailScreen({super.key, required this.email});
 
@@ -34,10 +32,8 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   @override
   void initState() {
     super.initState();
-    // OtpBoxes rebuilds itself on controller changes via its own
-    // AnimatedBuilder, but this screen's own build() (the "digits to
-    // go" text, the Verify button's enabled state) needs its own
-    // listener too, or it stays frozen at the initial empty state.
+    // OtpBoxes rebuilds itself, but this screen's own build (digit counter,
+    // Verify button state) needs a listener too or it stays on the initial state.
     _codeController.addListener(() => setState(() {}));
   }
 
@@ -141,10 +137,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                 child: IconButton(
                   padding: EdgeInsets.zero,
                   icon: const Icon(Icons.arrow_back_rounded),
-                  // Reached from SignupScreen via pushAndRemoveUntil (the
-                  // stack is deliberately cleared so a verified user can't
-                  // navigate back into a stale signup form) -- a plain
-                  // pop() would then have nothing to pop to and silently
+                  // Reached via pushAndRemoveUntil, so the stack may be empty and pop() would
                   // do nothing. Fall back to LoginScreen in that case.
                   onPressed: () {
                     if (Navigator.of(context).canPop()) {

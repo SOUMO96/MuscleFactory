@@ -10,11 +10,8 @@ class AuthService {
 
   Stream<User?> get authStateChanges => _auth.onAuthStateChange.map((state) => state.session?.user);
 
-  /// Raw auth state stream, event included -- needed to detect
-  /// [AuthChangeEvent.passwordRecovery] specifically (clicking a "forgot
-  /// password" email link signs the user in, but the app must show a
-  /// "set a new password" screen at that point rather than just letting
-  /// them into the app with their old/forgotten password still active).
+  /// Raw auth state stream. Needed to catch [AuthChangeEvent.passwordRecovery],
+  /// so a reset-password link opens the new-password screen instead of the app.
   Stream<AuthState> get authStateEvents => _auth.onAuthStateChange;
 
   User? get currentUser => _auth.currentUser;
@@ -41,11 +38,9 @@ class AuthService {
     return _auth.signInWithPassword(email: email, password: password);
   }
 
-  /// Redirect-based (not popup-based) on every platform, so it isn't
-  /// affected by popups being blocked inside embedded browser
-  /// panels/webviews. On web this navigates the page away immediately;
-  /// the app picks the signed-in user back up from [authStateChanges]
-  /// once Supabase redirects back (see SplashScreen).
+  /// Redirect-based on every platform, since popups get blocked in embedded
+  /// browsers. On web this leaves the page; the app picks the user back up from
+  /// [authStateChanges] after the redirect (see SplashScreen).
   Future<bool> signInWithGoogle() {
     return _auth.signInWithOAuth(OAuthProvider.google);
   }
@@ -63,10 +58,8 @@ class AuthService {
     return _auth.updateUser(UserAttributes(password: newPassword));
   }
 
-  /// True if [error] is Supabase's "email not confirmed" rejection --
-  /// callers use this to route to [VerifyEmailScreen] (see
-  /// features/auth/verify_email_screen.dart) instead of just showing an
-  /// error.
+  /// True if [error] is Supabase's "email not confirmed" rejection, so callers
+  /// can route to [VerifyEmailScreen] instead of showing an error.
   bool isEmailNotConfirmed(Object error) {
     if (error is! AuthException) return false;
     return error.code == 'email_not_confirmed' || error.message.toLowerCase().contains('email not confirmed');
@@ -86,11 +79,8 @@ class AuthService {
     return _auth.resend(type: OtpType.signup, email: email);
   }
 
-  /// Emails a fresh one-time code for the login step-up check -- called
-  /// right after a password has already been validated, so a correct
-  /// password alone is never enough to reach the app (see LoginScreen /
-  /// VerifyLoginScreen). `shouldCreateUser: false` so this can't be used
-  /// to sign up a new account by itself.
+  /// Emails a one-time code for the second login step, sent after the password
+  /// has already checked out. `shouldCreateUser: false` stops it creating accounts.
   Future<void> sendLoginCode(String email) {
     return _auth.signInWithOtp(email: email, shouldCreateUser: false);
   }
@@ -110,15 +100,16 @@ class AuthService {
       if (message.contains('invalid login credentials') || message.contains('invalid_credentials')) {
         return 'Incorrect email or password.';
       }
+      // Deliberately vague: saying an account already exists would let anyone
+      // check whether an email is registered (account enumeration).
       if (message.contains('user already registered') || message.contains('already exists')) {
-        return 'An account already exists with that email. Try logging in, '
-            "or use 'Forgot password?' if you signed up with Google.";
+        return "Couldn't create that account. If you already have one, try logging in or resetting your password instead.";
       }
       if (message.contains('email not confirmed')) {
         return 'Please confirm your email before logging in -- check your inbox.';
       }
-      if (message.contains('password') && message.contains('least')) {
-        return 'Choose a stronger password (at least 6 characters).';
+      if (message.contains('password') && (message.contains('least') || message.contains('character') || message.contains('weak'))) {
+        return 'Password must be at least 8 characters with upper and lower case letters and a number.';
       }
       if (message.contains('email') && message.contains('invalid')) {
         return 'That email address looks invalid.';

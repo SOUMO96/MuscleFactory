@@ -4,9 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../survey/survey_screen.dart';
 
-/// Direct copy of the design handoff's "Auth Verified" screen
-/// (MF Auth.dc.html) -- the moment between a successful signup
-/// verification and starting the onboarding survey.
+/// Shown once sign-up verification succeeds, before the onboarding survey.
 class VerifiedScreen extends StatelessWidget {
   const VerifiedScreen({super.key});
 

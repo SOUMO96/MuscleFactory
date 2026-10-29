@@ -11,10 +11,8 @@ import '../survey/survey_screen.dart';
 import 'login_screen.dart';
 import 'otp_boxes.dart';
 
-/// Step-up check shown after a correct password, on every login (same
-/// "Auth Verify" screen design as VerifyEmailScreen). A password alone
-/// never reaches the app: this asks for the fresh 6-digit code just
-/// emailed to [email], and only completes sign-in once verified.
+/// Second login step, shown after a correct password. Asks for the 6-digit
+/// code just emailed to [email]; sign-in only completes once it's verified.
 class VerifyLoginScreen extends StatefulWidget {
   const VerifyLoginScreen({super.key, required this.email});
 
@@ -34,10 +32,8 @@ class _VerifyLoginScreenState extends State<VerifyLoginScreen> {
   @override
   void initState() {
     super.initState();
-    // OtpBoxes rebuilds itself on controller changes via its own
-    // AnimatedBuilder, but this screen's own build() (the "digits to
-    // go" text, the Verify button's enabled state) needs its own
-    // listener too, or it stays frozen at the initial empty state.
+    // OtpBoxes rebuilds itself, but this screen's own build (digit counter,
+    // Verify button state) needs a listener too or it stays on the initial state.
     _codeController.addListener(() => setState(() {}));
   }
 

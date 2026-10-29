@@ -26,7 +26,10 @@ class GymClass {
         category: map['category'] as String,
         coachName: map['coach_name'] as String,
         location: map['location'] as String,
-        startsAt: DateTime.parse(map['starts_at'] as String).toLocal(),
+        // Deliberately not .toLocal(): the schedule stores the gym's wall-clock times
+        // labelled as UTC, so everyone sees the same "6:30 PM" regardless of device
+        // timezone.
+        startsAt: DateTime.parse(map['starts_at'] as String),
         durationMinutes: map['duration_minutes'] as int,
         capacity: map['capacity'] as int,
       );

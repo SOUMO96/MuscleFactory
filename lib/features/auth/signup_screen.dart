@@ -8,9 +8,8 @@ import 'login_screen.dart';
 import 'sso_row.dart';
 import 'verify_email_screen.dart';
 
-/// Direct copy of the design handoff's "Auth Sign up" screen (MF Auth.dc.html)
-/// -- no name field (the survey's first question collects that), a live
-/// password-strength meter, and the Apple/Google SSO row.
+/// Sign-up screen: no name field (the survey asks for it), a live
+/// password-strength meter and the Apple/Google SSO row.
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
@@ -71,6 +70,12 @@ class _SignupScreenState extends State<SignupScreen> {
 
     if (email.isEmpty || password.isEmpty) {
       _showError('Enter your email and password.');
+      return;
+    }
+    // Mirrors the server's password policy in supabase/config.toml (8+ chars,
+    // upper, lower, digit) so weak passwords are caught before a round trip.
+    if (password.length < 8 || !RegExp(r'[a-z]').hasMatch(password) || !RegExp(r'[A-Z]').hasMatch(password) || !RegExp(r'\d').hasMatch(password)) {
+      _showError('Password must be at least 8 characters with upper and lower case letters and a number.');
       return;
     }
 

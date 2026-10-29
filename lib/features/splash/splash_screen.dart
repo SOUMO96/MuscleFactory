@@ -15,12 +15,9 @@ import '../auth/reset_password_screen.dart';
 import '../onboarding/onboarding_screen.dart';
 import '../survey/survey_screen.dart';
 
-/// App boot screen: brand mark, tagline, then routes based on auth state.
-///
-/// Waits for Supabase's first auth-state event before trusting
-/// [AuthService.currentUser] -- this covers both a user returning from a
-/// Google sign-in redirect and a returning user whose session was simply
-/// restored from local persistence (auto login).
+/// Boot screen: brand mark, tagline, then routes by auth state. Waits for
+/// Supabase's first auth event before trusting [AuthService.currentUser], which
+/// covers both a Google sign-in redirect and a restored session.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -29,16 +26,16 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  bool _connectionFailed = false;
+
   @override
   void initState() {
     super.initState();
     _bootstrap();
   }
 
-  /// Supabase redirects back here with `?error=...` query params (instead
-  /// of a working session) when an email link -- password reset, signup
-  /// confirmation, etc. -- is expired or was already used. Turns that
-  /// into copy a user can actually act on.
+  /// Supabase redirects here with `?error=...` when an email link is expired or
+  /// already used. This turns that into a message the user can act on.
   String? _authErrorFromUrl() {
     final params = Uri.base.queryParameters;
     final errorCode = params['error_code'];
@@ -50,19 +47,15 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _bootstrap() async {
-    // Everything in here is wrapped in try/catch with a guaranteed
-    // fallback navigation: whatever goes wrong (a stream error, an RLS
-    // hiccup on the profile read, anything), the user must never be left
-    // stuck on this screen forever with no way forward.
+    // Wrapped in try/catch with a guaranteed fallback navigation so the user is
+    // never stuck on this screen.
     try {
       final urlError = _authErrorFromUrl();
       final minSplashTime = Future<void>.delayed(const Duration(milliseconds: 1800));
 
-      // Watch every auth event for the whole splash duration, not just
-      // the first one: when arriving from a password-recovery email
-      // link, Supabase's web SDK typically fires a generic session event
-      // first and only then a distinct passwordRecovery event once it
-      // finishes parsing the recovery token from the URL.
+      // Listen to every auth event, not just the first: a password-recovery link
+      // usually fires a generic session event first and the passwordRecovery event
+      // after the token has been parsed.
       var sawPasswordRecovery = false;
       final subscription = AuthService.instance.authStateEvents.listen(
         (state) {
@@ -92,10 +85,8 @@ class _SplashScreenState extends State<SplashScreen> {
         return;
       }
 
-      // A "forgot password" email link signs the user in (it proves
-      // email ownership) but they still don't know a working password --
-      // show the set-new-password screen instead of just letting them
-      // into the app.
+      // A reset link signs the user in, but they still need a working password,
+      // so show the new-password screen instead of the app.
       if (sawPasswordRecovery) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const ResetPasswordScreen()),
@@ -111,20 +102,38 @@ class _SplashScreenState extends State<SplashScreen> {
         return;
       }
 
-      var surveyDone = false;
-      try {
-        final profile = await UserRepository.instance.getUserProfile(user.id);
-        surveyDone = profile?.surveyCompleted ?? false;
-        if (profile != null) {
-          AppThemeController.instance.setMode(switch (profile.themePreference) {
-            ThemePreference.light => ThemeMode.light,
-            ThemePreference.dark => ThemeMode.dark,
-            ThemePreference.system => ThemeMode.system,
-          });
+      // A failed profile fetch must not be read as "survey not done": it's
+      // indistinguishable from the backend being briefly unreachable (e.g. a paused
+      // free-tier project waking up). Retry a few times, then let the user retry
+      // rather than guess.
+      AppUser? profile;
+      Object? lastError;
+      for (var attempt = 0; attempt < 4; attempt++) {
+        if (attempt > 0) await Future.delayed(const Duration(milliseconds: 700));
+        try {
+          profile = await UserRepository.instance.getUserProfile(user.id);
+          lastError = null;
+          break;
+        } catch (e) {
+          lastError = e;
         }
-      } catch (_) {
-        surveyDone = false;
       }
+
+      if (lastError != null) {
+        debugPrint('SplashScreen: profile fetch failed after retries: $lastError');
+        if (!mounted) return;
+        setState(() => _connectionFailed = true);
+        return;
+      }
+
+      if (profile != null) {
+        AppThemeController.instance.setMode(switch (profile.themePreference) {
+          ThemePreference.light => ThemeMode.light,
+          ThemePreference.dark => ThemeMode.dark,
+          ThemePreference.system => ThemeMode.system,
+        });
+      }
+      final surveyDone = profile?.surveyCompleted ?? false;
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
@@ -175,15 +184,34 @@ class _SplashScreenState extends State<SplashScreen> {
               style: AppTextStyles.bodySmall.copyWith(letterSpacing: 3, color: AppColors.textMuted),
             ),
             const SizedBox(height: 56),
-            SizedBox(
-              width: 32,
-              height: 32,
-              child: CircularProgressIndicator(
-                strokeWidth: 3,
-                valueColor: AlwaysStoppedAnimation(AppColors.primary),
-                backgroundColor: AppColors.divider,
+            if (_connectionFailed) ...[
+              Text(
+                "Couldn't reach the server. Check your connection.",
+                textAlign: TextAlign.center,
+                style: AppTextStyles.bodySmall.copyWith(color: AppColors.textMuted),
               ),
-            ),
+              const SizedBox(height: 16),
+              OutlinedButton(
+                onPressed: () {
+                  setState(() => _connectionFailed = false);
+                  _bootstrap();
+                },
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  side: BorderSide(color: AppColors.primary),
+                ),
+                child: const Text('Retry'),
+              ),
+            ] else
+              SizedBox(
+                width: 32,
+                height: 32,
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                  backgroundColor: AppColors.divider,
+                ),
+              ),
           ],
         ),
       ),

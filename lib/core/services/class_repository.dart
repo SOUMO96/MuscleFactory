@@ -11,9 +11,24 @@ class ClassRepository {
   SupabaseQueryBuilder get _classes => Supabase.instance.client.from('classes');
   SupabaseQueryBuilder get _bookings => Supabase.instance.client.from('class_bookings');
 
+  /// Tops up the next 14 days of classes from the weekly templates before
+  /// reading. Safe to call repeatedly (unique index on template + date).
+  Future<void> _ensureUpcoming() {
+    final target = DateTime.now().add(const Duration(days: 14));
+    final targetDate = '${target.year.toString().padLeft(4, '0')}-${target.month.toString().padLeft(2, '0')}-${target.day.toString().padLeft(2, '0')}';
+    return Supabase.instance.client.rpc('ensure_classes_through', params: {'target_date': targetDate});
+  }
+
   Future<List<GymClass>> upcoming({DateTime? from}) async {
-    final start = (from ?? DateTime.now()).toUtc().toIso8601String();
-    final rows = await _classes.select().gte('starts_at', start).order('starts_at');
+    await _ensureUpcoming();
+    final now = from ?? DateTime.now();
+    // `starts_at` holds the gym's local wall-clock time labelled as UTC (one
+    // location, no per-gym timezone), so the cutoff is built the same way
+    // instead of being converted from real UTC.
+    final start = DateTime.utc(now.year, now.month, now.day, now.hour, now.minute, now.second).toIso8601String();
+    // postgrest's .order() defaults to ascending: false -- explicit here,
+    // otherwise this returns latest-first instead of soonest-first.
+    final rows = await _classes.select().gte('starts_at', start).order('starts_at', ascending: true);
     return rows.map(GymClass.fromMap).toList();
   }
 

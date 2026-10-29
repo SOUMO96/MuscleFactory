@@ -8,10 +8,8 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/primary_button.dart';
 import '../survey/survey_screen.dart';
 
-/// Shown when the user arrives via a "Forgot password" email link.
-/// Clicking that link already establishes a session (it proves email
-/// ownership) -- this screen is where they actually set a new password,
-/// rather than just being let into the app still not knowing one.
+/// Shown when the user arrives from a "Forgot password" email link. The link
+/// already signs them in, so this is where they set the new password.
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
 
@@ -42,8 +40,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     final password = _passwordController.text;
     final confirm = _confirmController.text;
 
-    if (password.length < 6) {
-      _showError('Choose a password with at least 6 characters.');
+    if (password.length < 8 || !RegExp(r'[a-z]').hasMatch(password) || !RegExp(r'[A-Z]').hasMatch(password) || !RegExp(r'\d').hasMatch(password)) {
+      _showError('Password must be at least 8 characters with upper and lower case letters and a number.');
       return;
     }
     if (password != confirm) {
@@ -104,7 +102,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 controller: _passwordController,
                 obscureText: _obscure,
                 decoration: InputDecoration(
-                  hintText: 'Min. 6 characters',
+                  hintText: 'Min. 8 characters, upper+lower case, a number',
                   prefixIcon: Icon(Icons.lock_outline_rounded, color: AppColors.textMuted),
                   suffixIcon: IconButton(
                     icon: Icon(

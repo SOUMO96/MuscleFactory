@@ -3,9 +3,8 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 
-/// The design's 6-box OTP input: a row of visible digit boxes with an
-/// invisible numeric TextField stacked on top handling real input/focus
-/// (the same technique the design mock itself uses).
+/// A 6-box OTP input: visible digit boxes with an invisible numeric TextField
+/// stacked on top that handles input and focus.
 class OtpBoxes extends StatelessWidget {
   const OtpBoxes({super.key, required this.controller, this.length = 6, this.hasError = false, this.autofocus = false});
 

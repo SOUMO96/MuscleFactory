@@ -12,15 +12,12 @@ import 'sso_row.dart';
 import 'verify_email_screen.dart';
 import 'verify_login_screen.dart';
 
-/// Direct copy of the design handoff's "Auth Log in" screen
-/// (MF Auth.dc.html) -- a red "Welcome back" hero panel over the form.
+/// Log-in screen: a red "Welcome back" hero panel over the form.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, this.initialErrorMessage});
 
-  /// Shown once, right after the first frame -- used when SplashScreen
-  /// detects an `?error=...` redirect (e.g. an expired/already-used
-  /// password reset link) so the user sees a plain explanation instead
-  /// of just landing here with no context.
+  /// Shown once after the first frame. SplashScreen uses it when it sees an
+  /// `?error=...` redirect (e.g. an expired reset link) so the user gets an explanation.
   final String? initialErrorMessage;
 
   @override
