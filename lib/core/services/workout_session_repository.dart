@@ -21,10 +21,8 @@ class WorkoutSessionRepository {
     return _sessions.update({'ended_at': DateTime.now().toUtc().toIso8601String()}).eq('id', sessionId);
   }
 
-  /// Discards a session that was started but never actually logged
-  /// anything -- used when the user backs out of Active Workout
-  /// immediately, so an empty session doesn't count toward the plan's
-  /// day rotation, streaks, or workout counts.
+  /// Discards a session that was started but never logged anything, so backing
+  /// out of Active Workout doesn't count toward streaks or the day rotation.
   Future<void> deleteSession(String sessionId) {
     return _sessions.delete().eq('id', sessionId);
   }
@@ -43,6 +41,28 @@ class WorkoutSessionRepository {
       'weight_kg': weightKg,
       'reps': reps,
     });
+  }
+
+  /// All sets logged within one session, in the order they were done --
+  /// powers the workout session detail screen reached from History.
+  Future<List<LoggedSet>> setsForSession(String sessionId) async {
+    final rows = await _sets.select('*, exercises(name)').eq('session_id', sessionId).order('set_index', ascending: true);
+    return rows.map((r) => LoggedSet.fromMap(r)).toList();
+  }
+
+  /// The single heaviest set ever logged for [exerciseId] by [userId] --
+  /// powers the "Your best" line on the Library exercise detail sheet.
+  Future<LoggedSet?> bestSetForExercise({required String userId, required String exerciseId}) async {
+    final rows = await Supabase.instance.client
+        .from('logged_sets')
+        .select('*, exercises(name), workout_sessions!inner(user_id)')
+        .eq('exercise_id', exerciseId)
+        .eq('workout_sessions.user_id', userId)
+        .not('weight_kg', 'is', null)
+        .order('weight_kg', ascending: false)
+        .limit(1);
+    if (rows.isEmpty) return null;
+    return LoggedSet.fromMap(rows.first);
   }
 
   Future<List<WorkoutSession>> history(String userId, {int limit = 30}) async {
@@ -64,7 +84,7 @@ class WorkoutSessionRepository {
         .select('*, exercises(name), workout_sessions!inner(user_id)')
         .eq('workout_sessions.user_id', userId)
         .gte('completed_at', cutoff)
-        .order('completed_at');
+        .order('completed_at', ascending: true);
     return rows.map((r) => LoggedSet.fromMap(r)).toList();
   }
 }

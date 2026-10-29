@@ -24,11 +24,9 @@ class PlanTemplate {
   final List<TemplateDay> days;
 }
 
-/// A handful of pre-authored plans covering goal x days/week -- this is
-/// the "Use our plan" option's real implementation: a deterministic,
-/// rule-based pick, not a live AI call (see the redesign plan's scope
-/// notes). Falls back to the closest days/week template when there's no
-/// exact match.
+/// A few pre-written plans by goal and days per week. This is what "Use our
+/// plan" does: a rule-based pick (no AI call) that falls back to the closest
+/// days-per-week template.
 class PlanTemplates {
   PlanTemplates._();
 

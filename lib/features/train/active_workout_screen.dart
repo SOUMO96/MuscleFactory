@@ -12,10 +12,9 @@ import '../../core/widgets/primary_button.dart';
 import '../../shared/models/app_user.dart';
 import '../../shared/models/workout_plan.dart';
 
-/// Real set logger for a plan day: starts a workout_sessions row, lets the
-/// user log weight/reps per set against each prescribed exercise (writing
-/// to logged_sets), runs a rest timer between sets using the user's
-/// default_rest_seconds preference, and marks the session finished.
+/// Set logger for a plan day: starts a workout_sessions row, logs weight/reps
+/// per set to logged_sets, runs a rest timer from the user's default_rest_seconds,
+/// and marks the session finished.
 class ActiveWorkoutScreen extends StatefulWidget {
   const ActiveWorkoutScreen({super.key, required this.planDayId, required this.dayLabel});
 
@@ -136,10 +135,8 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
     Navigator.of(context).pop();
   }
 
-  /// The X button: if nothing was logged yet, discard the session
-  /// entirely rather than marking it finished -- otherwise backing out
-  /// immediately would still count as a completed workout (advancing
-  /// the plan's day rotation and streak) despite doing nothing.
+  /// The X button. If nothing was logged, discard the session instead of
+  /// finishing it, so backing out doesn't count as a completed workout.
   Future<void> _close() async {
     final loggedAnything = _logged.values.any((sets) => sets.isNotEmpty);
     if (_sessionId != null) {

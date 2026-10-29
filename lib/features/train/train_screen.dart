@@ -6,8 +6,7 @@ import 'history_view.dart';
 import 'library_view.dart';
 import 'plans_view.dart';
 
-/// The Train tab: Plans (default) / Library / History, replacing the old
-/// standalone dummy-data Workouts screen.
+/// The Train tab: Plans (default), Library and History.
 class TrainScreen extends StatefulWidget {
   const TrainScreen({super.key});
 

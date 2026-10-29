@@ -6,7 +6,10 @@ plugins {
 
 android {
     namespace = "com.example.ironpulse"
-    compileSdk = flutter.compileSdkVersion
+    // Overridden above Flutter's own default (34): file_picker pulls in
+    // flutter_plugin_android_lifecycle, which requires compiling against
+    // API 36+.
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

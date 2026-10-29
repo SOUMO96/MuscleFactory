@@ -18,7 +18,7 @@ class ExerciseRepository {
     if (query != null && query.trim().isNotEmpty) {
       builder = builder.ilike('name', '%${query.trim()}%');
     }
-    final rows = await builder.order('name');
+    final rows = await builder.order('name', ascending: true);
     return rows.map(Exercise.fromMap).toList();
   }
 

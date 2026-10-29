@@ -19,12 +19,14 @@ class PlanRepository {
   }
 
   Future<List<PlanDay>> getPlanDays(String planId) async {
-    final rows = await _planDays.select().eq('plan_id', planId).order('day_index');
+    // postgrest's .order() is descending by default; without ascending: true the
+    // days come back reversed, which also breaks Home's day rotation.
+    final rows = await _planDays.select().eq('plan_id', planId).order('day_index', ascending: true);
     return rows.map(PlanDay.fromMap).toList();
   }
 
   Future<List<PlanExercise>> getPlanExercises(String planDayId) async {
-    final rows = await _planExercises.select('*, exercises(name)').eq('plan_day_id', planDayId).order('order_index');
+    final rows = await _planExercises.select('*, exercises(name)').eq('plan_day_id', planDayId).order('order_index', ascending: true);
     return rows.map(PlanExercise.fromMap).toList();
   }
 
@@ -54,6 +56,10 @@ class PlanRepository {
         .single();
     return row['id'] as String;
   }
+
+  /// Days and exercises cascade-delete with the plan; logged workout
+  /// sessions are kept (their plan_day_id is set null), so history survives.
+  Future<void> deletePlan(String planId) => _plans.delete().eq('id', planId);
 
   Future<String> addPlanDay({required String planId, required int dayIndex, required String label}) async {
     final row = await _planDays.insert({'plan_id': planId, 'day_index': dayIndex, 'label': label}).select().single();

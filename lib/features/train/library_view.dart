@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../../core/services/auth_service.dart';
 import '../../core/services/exercise_repository.dart';
+import '../../core/services/workout_session_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../shared/models/exercise.dart';
+import '../../shared/models/workout_session.dart';
 
-/// Real, searchable/filterable exercise browser over the `exercises`
-/// catalog -- replaces the old dummy-data workout list.
+/// Searchable, filterable browser over the `exercises` catalog.
 class LibraryView extends StatefulWidget {
   const LibraryView({super.key});
 
@@ -138,12 +140,38 @@ class _LibraryViewState extends State<LibraryView> {
   }
 }
 
-class _ExerciseDetailSheet extends StatelessWidget {
+class _ExerciseDetailSheet extends StatefulWidget {
   const _ExerciseDetailSheet({required this.exercise});
   final Exercise exercise;
 
   @override
+  State<_ExerciseDetailSheet> createState() => _ExerciseDetailSheetState();
+}
+
+class _ExerciseDetailSheetState extends State<_ExerciseDetailSheet> {
+  LoggedSet? _best;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final userId = AuthService.instance.currentUser?.id;
+    if (userId == null) return;
+    final best = await WorkoutSessionRepository.instance.bestSetForExercise(userId: userId, exerciseId: widget.exercise.id);
+    if (!mounted) return;
+    setState(() {
+      _best = best;
+      _loading = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final exercise = widget.exercise;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
       child: Column(
@@ -171,6 +199,26 @@ class _ExerciseDetailSheet extends StatelessWidget {
           Text(
             exercise.description.isEmpty ? 'No description yet.' : exercise.description,
             style: AppTextStyles.bodyMedium,
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(border: Border.all(color: AppColors.divider)),
+            child: Row(
+              children: [
+                Icon(Icons.emoji_events_outlined, color: AppColors.primary, size: 20),
+                const SizedBox(width: 10),
+                if (_loading)
+                  Text('Loading your best…', style: AppTextStyles.bodyMedium)
+                else if (_best == null)
+                  Text("You haven't logged this exercise yet.", style: AppTextStyles.bodyMedium)
+                else
+                  Text(
+                    'Your best: ${_best!.weightKg} kg × ${_best!.reps}',
+                    style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w700),
+                  ),
+              ],
+            ),
           ),
         ],
       ),

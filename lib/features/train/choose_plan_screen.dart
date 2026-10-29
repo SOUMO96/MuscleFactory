@@ -11,11 +11,8 @@ import '../../shared/models/workout_plan.dart';
 import 'build_plan_screen.dart';
 import 'import_plan_screen.dart';
 
-/// The "Choose your plan" step: a ready-made template picked from the
-/// user's goal/days-per-week ("Use our plan" -- a deterministic rule-based
-/// pick, not a live AI call), a custom day-by-day builder, or a CSV
-/// import. See the redesign plan's scope notes for why import is
-/// CSV-only rather than XLSX/PDF/photo.
+/// Plan chooser: a template picked by goal and days per week (rule-based, no
+/// AI call), a custom day-by-day builder, or an import from CSV, Excel or PDF.
 class ChoosePlanScreen extends StatefulWidget {
   const ChoosePlanScreen({super.key, required this.profile});
 
@@ -108,7 +105,7 @@ class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
                   const SizedBox(height: 12),
                   _OptionCard(
                     title: 'Import my plan',
-                    subtitle: 'Paste a CSV (day, exercise, sets, reps).',
+                    subtitle: 'Upload a CSV, Excel, or PDF file, or paste a CSV.',
                     icon: Icons.upload_file_rounded,
                     onTap: () async {
                       final created = await Navigator.of(context).push<bool>(
